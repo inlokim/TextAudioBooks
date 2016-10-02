@@ -40,7 +40,7 @@
 - (void)setDetailItem:(NSDate *)newDetailItem {
     if (_detailItem != newDetailItem) {
         _detailItem = newDetailItem;
-        
+         
         // Update the view.
         [self configureView];
     }
