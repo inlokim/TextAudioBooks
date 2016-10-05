@@ -10,28 +10,121 @@
 #import "BookViewController.h"
 #import "Utils.h"
 
-
 @interface BookViewController ()
 {
     BOOL xmlExists;
-}
+    NSUInteger indexRow;
+    
+    NSXMLParser *xmlParser;
+    NSMutableArray *arrNeighboursData;
+    NSMutableDictionary *dictTempDataStorage;
+    NSMutableString *foundValue;
+    
+    NSString *currentElement;
+    NSString *currentAttribute;
+    
+    
+    AVAudioPlayer *player;
+    NSString *keyValue;
+    NSTimer	*updateTimer;
+    
+    
+    NSUInteger				currentRow;
+    NSUInteger				cellHeight;
 
-@property (nonatomic, strong) NSXMLParser *xmlParser;
-@property (nonatomic, strong) NSMutableArray *arrNeighboursData;
-@property (nonatomic, strong) NSMutableDictionary *dictTempDataStorage;
-@property (nonatomic, strong) NSMutableString *foundValue;
-@property (nonatomic, strong) NSString *currentElement;
+    NSString				* myTitle;
+    float					endTime;
+    
+    NSIndexPath				* theIndexPath;
+    NSIndexPath				* activateIndexPath;
+    
+    BOOL					firstTime;
+    
+    
+    IBOutlet UIBarButtonItem * playButton;
+}
 
 @end
 
 @implementation BookViewController
 
+
+void RouteChangeListener(void *                  inClientData,
+                         AudioSessionPropertyID	 inID,
+                         UInt32                  inDataSize,
+                         const void *            inData);
+
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    firstTime = TRUE;
+    currentRow = 0;
+    
     [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"Cell"];
     [self XMLSetup];
+    [self loadAudio];
+    
+    /******
+     AUDIO
+     ******/
+ /*   OSStatus result = AudioSessionInitialize(NULL, NULL, NULL, NULL);
+    if (result)
+        NSLog(@"Error initializing audio session! %ld", result);
+    
+    [[AVAudioSession sharedInstance] setDelegate: self];
+    NSError *setCategoryError = nil;
+    [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayback error: &setCategoryError];
+    if (setCategoryError)
+        NSLog(@"Error setting category! %@", setCategoryError);
+    
+    result = AudioSessionAddPropertyListener (kAudioSessionProperty_AudioRouteChange, RouteChangeListener, (__bridge void *)(self));
+    if (result)
+        NSLog(@"Could not add property listener! %ld", result);
+    
+    
+  */
+    /******
+     ROW
+     ******/
+    theIndexPath = [NSIndexPath indexPathForRow:currentRow inSection:0];
+    
+/*    //첫 로우
+    if (currentRow == 0)
+    {
+        [self selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionTop];
+    }
+    //마지막 로우
+    else if (scripts.count == currentRow)
+    {
+        NSLog(@"lastRow");
+        [tableView selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionBottom];
+    }
+    else
+    {
+        [tableView selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionMiddle];
+    }
+    */
+    
+}
+
+
+/**************************
+ * 오디오를 로드한다.
+ *************************/
+
+- (void) loadAudio
+{
+
+    //NSString *file = [NSString stringWithFormat:@"%@/audios/%@.mp3",path,keyValue];
+    
+     NSString * path = [[NSBundle mainBundle] pathForResource:@"aroundtheworldineightydays_01_verne_64kb" ofType:@"mp3"];
+    
+    player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:path] error:nil];
 
 }
+
+
 
 #pragma mark - ViewDisplay
 
@@ -52,17 +145,17 @@
         path = [[NSBundle mainBundle] pathForResource:@"aroundtheworldineightydays_01_verne_64kb" ofType:@"xml"];
     }
     
-    self.xmlParser = [[NSXMLParser alloc] initWithData:[NSData dataWithContentsOfFile:path]];
-    self.foundValue = [[NSMutableString alloc] init];
-    self.xmlParser.delegate = self;
-    [self.xmlParser parse];
+    xmlParser = [[NSXMLParser alloc] initWithData:[NSData dataWithContentsOfFile:path]];
+    foundValue = [[NSMutableString alloc] init];
+    xmlParser.delegate = self;
+    [xmlParser parse];
 }
 
 #pragma mark - NSXMLParser
 
 -(void)parserDidStartDocument:(NSXMLParser *)parser{
     // Initialize the neighbours data array.
-    self.arrNeighboursData = [[NSMutableArray alloc] init];
+    arrNeighboursData = [[NSMutableArray alloc] init];
 }
 
 -(void)parserDidEndDocument:(NSXMLParser *)parser{
@@ -72,41 +165,47 @@
 
 -(void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict{
     
+    ///NSString *attributeValue;
+    
     // If the current element name is equal to "geoname" then initialize the temporary dictionary.
     if ([elementName isEqualToString:@"SYNC"]) {
-        self.dictTempDataStorage = [[NSMutableDictionary alloc] init];
+        dictTempDataStorage = [[NSMutableDictionary alloc] init];
         //NSLog(@"START : %@", [attributeDict objectForKey:@"START"]);
+        currentAttribute = [attributeDict objectForKey:@"START"];
     }
     
     // Keep the current element.
-    self.currentElement = elementName;
+    currentElement = elementName;
+    //currentAttribute = attributeValue;
 }
 
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName{
     
     if ([elementName isEqualToString:@"SYNC"]) {
-        // If the closing element equals to "geoname" then the all the data of a neighbour country has been parsed and the dictionary should be added to the neighbours data array.
-        [self.arrNeighboursData addObject:[[NSDictionary alloc] initWithDictionary:self.dictTempDataStorage]];
+        [arrNeighboursData addObject:[[NSDictionary alloc] initWithDictionary:dictTempDataStorage]];
+        
     }
     else if ([elementName isEqualToString:@"DESC"]){
         
-        NSLog(@"DESC : %@", [NSString stringWithString:self.foundValue]);
+        //NSLog(@"DESC : %@", [NSString stringWithString:foundValue]);
         
-        // If the country name element was found then store it.
-        [self.dictTempDataStorage setObject:[NSString stringWithString:self.foundValue] forKey:@"Description"];
+        [dictTempDataStorage setObject:[NSString stringWithString:foundValue] forKey:@"Description"];
+        
+        //NSLog(@"currentAttribute : %@", currentAttribute);
+        [dictTempDataStorage setObject:currentAttribute forKey:@"StartTime"];
     }
     // Clear the mutable string.
-    [self.foundValue setString:@""];
+    [foundValue setString:@""];
 }
 
 -(void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string{
     // Store the found characters if only we're interested in the current element.
-    if ([self.currentElement isEqualToString:@"DESC"])
+    if ([currentElement isEqualToString:@"DESC"])
     {
         if (![string isEqualToString:@"\n"]) {
             
             string = [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            [self.foundValue appendString:string];
+            [foundValue appendString:string];
         }
     }
 }
@@ -118,7 +217,7 @@
 #pragma mark - ViewController
 
 - (void)viewWillAppear:(BOOL)animated {
-//    self.clearsSelectionOnViewWillAppear = self.splitViewController.isCollapsed;
+    //    self.clearsSelectionOnViewWillAppear = self.splitViewController.isCollapsed;
     [super viewWillAppear:animated];
 }
 
@@ -135,52 +234,250 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.arrNeighboursData.count;
+    return arrNeighboursData.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     //static NSString *CellIdentifier = @"Cell";
     //UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-
+    
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
     [cell.textLabel setLineBreakMode:NSLineBreakByWordWrapping];
     [cell.textLabel setHighlightedTextColor:[UIColor blueColor]];
     [cell setBackgroundColor:[UIColor colorWithRed:.9 green:.9 blue:.9 alpha:1]];
     cell.textLabel.numberOfLines = 0;
     cell.textLabel.text =
-    [[self.arrNeighboursData objectAtIndex:indexPath.row] objectForKey:@"Description"];
+    [[arrNeighboursData objectAtIndex:indexPath.row] objectForKey:@"Description"];
+    // NSLog(@"StartTime : %@", [[arrNeighboursData objectAtIndex:indexPath.row] objectForKey:@"StartTime"]);
     
-    
-
     return cell;
 }
 
-/*
-- (CGFloat)tableView:(UITableView *)myTableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-
-    NSString *cellText =
-    [[self.arrNeighboursData objectAtIndex:indexPath.row] objectForKey:@"Description"];
-    UIFont *cellFont;
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    CGFloat width = 300.0f;
+    NSString *startTime = [[arrNeighboursData objectAtIndex:indexPath.row] objectForKey:@"StartTime"];
+    player.currentTime = [startTime floatValue] / 1000;
     
-    CGSize constraintSize = CGSizeMake(width, MAXFLOAT);
-    CGSize labelSize =
-    [cellText sizeWithFont:cellFont constrainedToSize:constraintSize
-                                lineBreakMode:UILineBreakModeWordWrap];
-    [cellText si]
-  
-    return labelSize.height+20;
-}
-*/
-
-
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
+    currentRow = indexPath.row;
 }
 
+
+
+
+
+
+
+#pragma mark - AudioSession handlers
+/******************************************
+ * 타이머 핸들링
+ ******************************************/
+- (void)updateCurrentTime
+{
+    endTime = player.currentTime ;
+   
+    //마지막 로우
+    if (currentRow == (arrNeighboursData.count-1))
+    {
+        NSLog(@"last Row");
+        if (!player.playing){
+            [updateTimer invalidate];
+            updateTimer = nil;
+
+           // [playButton setImage:playBtnBG forState:UIControlStateNormal];
+            //firstTime true로 해주면 마지막 로우에서 버튼 클릭해도 문제 안생김
+            firstTime = TRUE;
+            
+            [self.navigationController setNavigationBarHidden:NO animated:YES];
+        }
+        
+        //spleep모드로 빠지는 것을 허가한다.
+        [UIApplication sharedApplication].idleTimerDisabled = NO;
+    }
+    else {
+        NSString *startTime = [[arrNeighboursData objectAtIndex:currentRow + 1] objectForKey:@"StartTime"];
+        float thisEndTime = [startTime floatValue] / 1000;
+        
+        
+        if (endTime > thisEndTime)
+        {
+            //NSLog(@"endTime > thisEndTime  currentRow=%d", currentRow);
+            // [self tableView:self.tableView didSelectRowAtIndexPath:theIndexPath];
+            
+            theIndexPath = [NSIndexPath indexPathForRow:currentRow+1 inSection:0];
+            //[theIndexPath.row = 1;
+            //NSLog(@"theIndexPath.row = %d", theIndexPath.row);
+        /*
+            UITableViewCell *cell = [tableView cellForRowAtIndexPath:theIndexPath];
+            cellHeight = (NSUInteger)cell.contentView.frame.size.height;
+            
+            if ( cellHeight > 300 ) {
+                //NSLog(@"Cell height: %f", cell.contentView.frame.size.height);
+                [tableView selectRowAtIndexPath:theIndexPath animated:YES
+                                 scrollPosition:UITableViewScrollPositionTop];
+            }
+            else {
+                [tableView selectRowAtIndexPath:theIndexPath animated:YES
+                                 scrollPosition:UITableViewScrollPositionMiddle];
+            }
+          */
+            
+            currentRow = currentRow + 1;
+            
+        }
+    }
+}
+
+/******************************************
+ * 버튼 클릭 핸들링
+ ******************************************/
+- (IBAction)playSound:(id)sender {
+    
+    //플레이중
+    if (player.playing) {
+        NSLog(@"playing pause");
+
+        [self pausePlayer:player];
+    }
+    //플레이가 아니라면
+    else {
+        NSLog(@"playing play");
+        
+        //이번 화면이 처음 시작이라면 해당 로우를 찾는다.
+        if (firstTime) {
+            
+            NSString *startTime = [[arrNeighboursData objectAtIndex:currentRow] objectForKey:@"StartTime"];
+
+            player.currentTime = [startTime floatValue] / 1000;
+            /*if (currentRow == 0) {
+             
+             NSLog(@"currentRow == 0");
+             [tableView selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionTop];
+             }*/
+            theIndexPath = [NSIndexPath indexPathForRow:currentRow inSection:0];
+            firstTime = FALSE;
+        }
+
+        [self startPlayer:player];
+    }
+}
+
+/**************
+ * 음성 시작
+ *************/
+-(void)startPlayer:(AVAudioPlayer*)p
+{
+    [self.navigationController setNavigationBarHidden:YES animated:YES];
+    
+    NSLog(@"wwcurrentTime=%f",p.currentTime);
+    
+    [p play];
+    
+    updateTimer = [NSTimer scheduledTimerWithTimeInterval:.01
+                                                   target:self selector:@selector(updateCurrentTime)
+                                                 userInfo:player repeats:YES];
+    
+    //spleep모드로 빠지는 것을 막는다.
+    [UIApplication sharedApplication].idleTimerDisabled = YES;
+}
+
+/**************
+ * 음성 멈춤
+ *************/
+-(void)pausePlayer:(AVAudioPlayer*)p
+{
+   // [playButton setImage:playBtnBG forState:UIControlStateNormal];
+    [self.navigationController setNavigationBarHidden:NO animated:YES];
+    
+    [p pause];
+    if ([updateTimer isValid]) {
+        NSLog(@"updateTimer isValid");
+        [updateTimer invalidate];
+        updateTimer = nil;
+    }
+    
+    //spleep모드로 빠지는 것을 허가한다.
+    [UIApplication sharedApplication].idleTimerDisabled = NO;
+    
+   // [self savePersistData];
+}
+
+/**************
+ * 플레이어 stop
+ *************/
+-(void)stopPlayer {
+    
+    NSLog(@"Stop Player");
+    [player stop];
+    if ([updateTimer isValid]) {
+        NSLog(@"updateTimer isValid");
+        [updateTimer invalidate];
+        updateTimer = nil;
+    }
+    
+    //spleep모드로 빠지는 것을 허가한다.
+    [UIApplication sharedApplication].idleTimerDisabled = NO;
+    
+    
+  //  [self savePersistData];
+}
+
+
+
+#pragma mark- AudioSession handlers
+void RouteChangeListener(void *                  inClientData,
+                         AudioSessionPropertyID	 inID,
+                         UInt32                  inDataSize,
+                         const void *            inData)
+{
+    BookViewController* This = (BookViewController*)CFBridgingRelease(inClientData);
+    
+    if (inID == kAudioSessionProperty_AudioRouteChange) {
+        
+        CFDictionaryRef routeDict = (CFDictionaryRef)inData;
+        NSNumber* reasonValue = (NSNumber*)CFDictionaryGetValue(routeDict, CFSTR(kAudioSession_AudioRouteChangeKey_Reason));
+        
+        int reason = [reasonValue intValue];
+        
+        if (reason == kAudioSessionRouteChangeReason_OldDeviceUnavailable) {
+            
+            [This pausePlayer:This->player];
+        }
+    }
+}
+
+
+#pragma mark AVAudioPlayer delegate methods
+
+- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)p successfully:(BOOL)flag
+{
+    NSLog(@"test");
+    
+    if (flag == NO)
+        NSLog(@"Playback finished unsuccessfully");
+    
+    [p setCurrentTime:0.];
+    //[self updateViewForPlayerState:p];
+}
+
+- (void)playerDecodeErrorDidOccur:(AVAudioPlayer *)p error:(NSError *)error
+{
+    NSLog(@"ERROR IN DECODE: %@\n", error); 
+}
+
+
+// we will only get these notifications if playback was interrupted
+- (void)audioPlayerBeginInterruption:(AVAudioPlayer *)p
+{
+    NSLog(@"Interruption begin. Updating UI for new state");
+    // the object has already been paused,	we just need to update UI
+}
+
+- (void)audioPlayerEndInterruption:(AVAudioPlayer *)p
+{
+    NSLog(@"Interruption ended. Resuming playback");
+    [self startPlayer:p];
+}
 
 
 
