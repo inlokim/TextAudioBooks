@@ -10,6 +10,9 @@
 
 @import AVFoundation;
 
-@interface BookViewController : UITableViewController <NSXMLParserDelegate,  AVAudioPlayerDelegate, NSURLSessionDelegate>
+@interface BookViewController : UITableViewController <NSXMLParserDelegate,  AVAudioPlayerDelegate>
+
+@property (strong, nonatomic) NSString *fileID;
+@property (strong, nonatomic) NSString *title;
 
 @end

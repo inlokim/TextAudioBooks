@@ -20,6 +20,9 @@
 		312151331DA2920E00A69D9A /* list.xml in Resources */ = {isa = PBXBuildFile; fileRef = 3121512E1DA2920E00A69D9A /* list.xml */; };
 		312151341DA2920E00A69D9A /* iPhoneBack.png in Resources */ = {isa = PBXBuildFile; fileRef = 312151301DA2920E00A69D9A /* iPhoneBack.png */; };
 		7A41D33B1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7A41D33A1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png */; };
+		7A41D33F1DA5DFD3000D3AB1 /* BookTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D33E1DA5DFD3000D3AB1 /* BookTableViewCell.m */; };
+		7A41D3431DA62B61000D3AB1 /* ContentsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D3421DA62B61000D3AB1 /* ContentsViewController.m */; };
+		7A41D3471DA7621E000D3AB1 /* BookCoverViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D3461DA7621E000D3AB1 /* BookCoverViewController.m */; };
 		7AA049CD1DA37C0F006A8CB4 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AA049CC1DA37C0F006A8CB4 /* Utils.m */; };
 		7AA049CF1DA4BF38006A8CB4 /* play-off~iphone@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7AA049CE1DA4BF38006A8CB4 /* play-off~iphone@3x.png */; };
 /* End PBXBuildFile section */
@@ -44,6 +47,12 @@
 		3121512E1DA2920E00A69D9A /* list.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = list.xml; sourceTree = "<group>"; };
 		312151301DA2920E00A69D9A /* iPhoneBack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = iPhoneBack.png; sourceTree = "<group>"; };
 		7A41D33A1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "speaker_off~iphone@2x.png"; path = "images/speaker_off~iphone@2x.png"; sourceTree = "<group>"; };
+		7A41D33E1DA5DFD3000D3AB1 /* BookTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookTableViewCell.m; sourceTree = "<group>"; };
+		7A41D3401DA5E31F000D3AB1 /* BookTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookTableViewCell.h; sourceTree = "<group>"; };
+		7A41D3421DA62B61000D3AB1 /* ContentsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContentsViewController.m; sourceTree = "<group>"; };
+		7A41D3441DA62B86000D3AB1 /* ContentsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContentsViewController.h; sourceTree = "<group>"; };
+		7A41D3451DA7621E000D3AB1 /* BookCoverViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookCoverViewController.h; sourceTree = "<group>"; };
+		7A41D3461DA7621E000D3AB1 /* BookCoverViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookCoverViewController.m; sourceTree = "<group>"; };
 		7AA049CB1DA37C0F006A8CB4 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		7AA049CC1DA37C0F006A8CB4 /* Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
 		7AA049CE1DA4BF38006A8CB4 /* play-off~iphone@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "play-off~iphone@3x.png"; path = "images/play-off~iphone@3x.png"; sourceTree = "<group>"; };
@@ -167,8 +176,12 @@
 		312151211DA2869600A69D9A /* Book */ = {
 			isa = PBXGroup;
 			children = (
+				312151381DA6866D00A69D9A /* Cover */,
+				7A41D3411DA62B3F000D3AB1 /* Contents */,
 				312151261DA28E0100A69D9A /* BookViewController.h */,
 				312151271DA28EE000A69D9A /* BookViewController.m */,
+				7A41D3401DA5E31F000D3AB1 /* BookTableViewCell.h */,
+				7A41D33E1DA5DFD3000D3AB1 /* BookTableViewCell.m */,
 			);
 			name = Book;
 			sourceTree = "<group>";
@@ -206,6 +219,24 @@
 				312151301DA2920E00A69D9A /* iPhoneBack.png */,
 			);
 			path = images;
+			sourceTree = "<group>";
+		};
+		312151381DA6866D00A69D9A /* Cover */ = {
+			isa = PBXGroup;
+			children = (
+				7A41D3451DA7621E000D3AB1 /* BookCoverViewController.h */,
+				7A41D3461DA7621E000D3AB1 /* BookCoverViewController.m */,
+			);
+			name = Cover;
+			sourceTree = "<group>";
+		};
+		7A41D3411DA62B3F000D3AB1 /* Contents */ = {
+			isa = PBXGroup;
+			children = (
+				7A41D3441DA62B86000D3AB1 /* ContentsViewController.h */,
+				7A41D3421DA62B61000D3AB1 /* ContentsViewController.m */,
+			);
+			name = Contents;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -291,9 +322,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A41D3471DA7621E000D3AB1 /* BookCoverViewController.m in Sources */,
+				7A41D3431DA62B61000D3AB1 /* ContentsViewController.m in Sources */,
 				312151281DA28EE000A69D9A /* BookViewController.m in Sources */,
 				31214FE81DA0E69200A69D9A /* AppDelegate.m in Sources */,
 				31214FEB1DA0E69200A69D9A /* MasterViewController.m in Sources */,
+				7A41D33F1DA5DFD3000D3AB1 /* BookTableViewCell.m in Sources */,
 				7AA049CD1DA37C0F006A8CB4 /* Utils.m in Sources */,
 				31214FE51DA0E69200A69D9A /* main.m in Sources */,
 				31214FEE1DA0E69200A69D9A /* DetailViewController.m in Sources */,

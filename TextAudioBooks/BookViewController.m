@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "BookViewController.h"
+#import "BookTableViewCell.h"
 #import "Utils.h"
 
 @interface BookViewController ()
@@ -23,11 +24,8 @@
     NSString *currentElement;
     NSString *currentAttribute;
     
-    
     AVAudioPlayer *player;
-    NSString *keyValue;
     NSTimer	*updateTimer;
-    
     
     NSUInteger				currentRow;
     NSUInteger				cellHeight;
@@ -40,14 +38,18 @@
     
     BOOL					firstTime;
     
-    
     IBOutlet UIBarButtonItem * playButton;
+   
 }
 
 @end
 
 @implementation BookViewController
 
+@synthesize fileID;
+@synthesize title;
+
+static NSString *cellIdentifier = @"MyCell";
 
 void RouteChangeListener(void *                  inClientData,
                          AudioSessionPropertyID	 inID,
@@ -58,10 +60,24 @@ void RouteChangeListener(void *                  inClientData,
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.title = title;
+    
+    
+    NSLog(@"title : %@, fileID : %@", title, fileID);
+    
     firstTime = TRUE;
     currentRow = 0;
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(didChangePreferredContentSize:)
+                                                 name:UIContentSizeCategoryDidChangeNotification object:nil];
     
-    [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"Cell"];
+    self.tableView.estimatedRowHeight = 200.0;
+    self.tableView.rowHeight = UITableViewAutomaticDimension;
+    
+  //  [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:CellIdentifier];
+
+    
     [self XMLSetup];
     [self loadAudio];
     
@@ -105,23 +121,18 @@ void RouteChangeListener(void *                  inClientData,
         [tableView selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionMiddle];
     }
     */
-    
 }
 
-
-/**************************
- * 오디오를 로드한다.
- *************************/
-
-- (void) loadAudio
+- (void)didChangePreferredContentSize:(NSNotification *)notification
 {
+    [self.tableView reloadData];
+}
 
-    //NSString *file = [NSString stringWithFormat:@"%@/audios/%@.mp3",path,keyValue];
-    
-     NSString * path = [[NSBundle mainBundle] pathForResource:@"aroundtheworldineightydays_01_verne_64kb" ofType:@"mp3"];
-    
-    player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:path] error:nil];
-
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:UIContentSizeCategoryDidChangeNotification
+                                                  object:nil];
 }
 
 
@@ -142,7 +153,7 @@ void RouteChangeListener(void *                  inClientData,
     }
     else {
         //use Sample file
-        path = [[NSBundle mainBundle] pathForResource:@"aroundtheworldineightydays_01_verne_64kb" ofType:@"xml"];
+        path = [[NSBundle mainBundle] pathForResource:fileID ofType:@"xml"];
     }
     
     xmlParser = [[NSXMLParser alloc] initWithData:[NSData dataWithContentsOfFile:path]];
@@ -229,9 +240,6 @@ void RouteChangeListener(void *                  inClientData,
 
 #pragma mark - Table View
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
-}
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return arrNeighboursData.count;
@@ -239,20 +247,25 @@ void RouteChangeListener(void *                  inClientData,
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    //static NSString *CellIdentifier = @"Cell";
-    //UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    BookTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
     
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-    [cell.textLabel setLineBreakMode:NSLineBreakByWordWrapping];
-    [cell.textLabel setHighlightedTextColor:[UIColor blueColor]];
-    [cell setBackgroundColor:[UIColor colorWithRed:.9 green:.9 blue:.9 alpha:1]];
-    cell.textLabel.numberOfLines = 0;
-    cell.textLabel.text =
-    [[arrNeighboursData objectAtIndex:indexPath.row] objectForKey:@"Description"];
-    // NSLog(@"StartTime : %@", [[arrNeighboursData objectAtIndex:indexPath.row] objectForKey:@"StartTime"]);
+    [self configureCell:cell forRowAtIndexPath:indexPath];
     
     return cell;
 }
+
+
+- (void)configureCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if ([cell isKindOfClass:[BookTableViewCell class]])
+    {
+        BookTableViewCell *textCell = (BookTableViewCell *)cell;
+        textCell.textLabel.text
+        = [[arrNeighboursData objectAtIndex:indexPath.row] objectForKey:@"Description"];
+        textCell.textLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+    }
+}
+
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
@@ -262,13 +275,23 @@ void RouteChangeListener(void *                  inClientData,
     currentRow = indexPath.row;
 }
 
-
-
-
-
-
-
 #pragma mark - AudioSession handlers
+
+/**************************
+ * 오디오를 로드한다.
+ *************************/
+
+- (void) loadAudio
+{
+    
+    //NSString *file = [NSString stringWithFormat:@"%@/audios/%@.mp3",path,keyValue];
+    
+    NSString * path = [[NSBundle mainBundle] pathForResource:@"aroundtheworldineightydays_01_verne_64kb" ofType:@"mp3"];
+    
+    player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:path] error:nil];
+    
+}
+
 /******************************************
  * 타이머 핸들링
  ******************************************/
@@ -301,27 +324,27 @@ void RouteChangeListener(void *                  inClientData,
         
         if (endTime > thisEndTime)
         {
-            //NSLog(@"endTime > thisEndTime  currentRow=%d", currentRow);
-            // [self tableView:self.tableView didSelectRowAtIndexPath:theIndexPath];
-            
+           
             theIndexPath = [NSIndexPath indexPathForRow:currentRow+1 inSection:0];
-            //[theIndexPath.row = 1;
-            //NSLog(@"theIndexPath.row = %d", theIndexPath.row);
-        /*
-            UITableViewCell *cell = [tableView cellForRowAtIndexPath:theIndexPath];
+
+            //Cell Highlighted
+            
+            UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:theIndexPath];
             cellHeight = (NSUInteger)cell.contentView.frame.size.height;
             
-            if ( cellHeight > 300 ) {
+            if ( cellHeight > 300 )
+            {
                 //NSLog(@"Cell height: %f", cell.contentView.frame.size.height);
-                [tableView selectRowAtIndexPath:theIndexPath animated:YES
+                [self.tableView selectRowAtIndexPath:theIndexPath animated:YES
                                  scrollPosition:UITableViewScrollPositionTop];
             }
-            else {
-                [tableView selectRowAtIndexPath:theIndexPath animated:YES
+            else
+            {
+                [self.tableView
+                 selectRowAtIndexPath:theIndexPath animated:YES
                                  scrollPosition:UITableViewScrollPositionMiddle];
             }
-          */
-            
+          
             currentRow = currentRow + 1;
             
         }
@@ -331,21 +354,24 @@ void RouteChangeListener(void *                  inClientData,
 /******************************************
  * 버튼 클릭 핸들링
  ******************************************/
-- (IBAction)playSound:(id)sender {
-    
+- (IBAction)playSound:(id)sender
+{
     //플레이중
-    if (player.playing) {
+    if (player.playing)
+    {
         NSLog(@"playing pause");
-
+        [playButton setTitle:@"Play"];
         [self pausePlayer:player];
     }
     //플레이가 아니라면
-    else {
+    else
+    {
         NSLog(@"playing play");
+        [playButton setTitle:@"Stop"];
         
         //이번 화면이 처음 시작이라면 해당 로우를 찾는다.
-        if (firstTime) {
-            
+        if (firstTime)
+        {
             NSString *startTime = [[arrNeighboursData objectAtIndex:currentRow] objectForKey:@"StartTime"];
 
             player.currentTime = [startTime floatValue] / 1000;
@@ -422,9 +448,6 @@ void RouteChangeListener(void *                  inClientData,
   //  [self savePersistData];
 }
 
-
-
-#pragma mark- AudioSession handlers
 void RouteChangeListener(void *                  inClientData,
                          AudioSessionPropertyID	 inID,
                          UInt32                  inDataSize,
