@@ -15,15 +15,18 @@
 {
     BOOL xmlExists;
     NSUInteger indexRow;
+
     
+    //XML
     NSXMLParser *xmlParser;
     NSMutableArray *arrNeighboursData;
     NSMutableDictionary *dictTempDataStorage;
     NSMutableString *foundValue;
-    
     NSString *currentElement;
     NSString *currentAttribute;
     
+    
+    //Audio
     AVAudioPlayer *player;
     NSTimer	*updateTimer;
     

@@ -1,67 +1,148 @@
-//
-//  AppDelegate.m
-//  TextAudioBooks
-//
-//  Created by 김인로 on 2016. 10. 2..
-//  Copyright © 2016년 highwill. All rights reserved.
-//
+/*
+ Copyright (C) 2015 Apple Inc. All Rights Reserved.
+ See LICENSE.txt for this sample’s licensing information
+ 
+ Abstract:
+ Application delegate for the LazyTableImages sample.
+ It also downloads in the background the "Top Paid iPhone Apps" RSS feed using NSURLSession/NSURLSessionDataTask.
+ */
 
 #import "AppDelegate.h"
-#import "DetailViewController.h"
+#import "LatestViewController.h"
+#import "ParseOperation.h"
+#import "AppRecord.h"
 
-@interface AppDelegate () <UISplitViewControllerDelegate>
+
+// the http URL used for fetching the top iOS paid apps on the App Store
+//static NSString *const TopPaidAppsFeed =
+//@"http://phobos.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toppaidapplications/limit=75/xml";
+
+static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php";
+
+@interface AppDelegate ()
+
+// the queue to run our "ParseOperation"
+@property (nonatomic, strong) NSOperationQueue *queue;
+
+// the NSOperation driving the parsing of the RSS feed
+@property (nonatomic, strong) ParseOperation *parser;
 
 @end
 
+
+#pragma mark -
+
 @implementation AppDelegate
 
-
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
- /*   UISplitViewController *splitViewController = (UISplitViewController *)self.window.rootViewController;
-    UINavigationController *navigationController = [splitViewController.viewControllers lastObject];
-    navigationController.topViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem;
-    splitViewController.delegate = self;*/
+// -------------------------------------------------------------------------------
+//	application:didFinishLaunchingWithOptions:
+// -------------------------------------------------------------------------------
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:latestList]];
+    
+    // create an session data task to obtain and the XML feed
+    NSURLSessionDataTask *sessionTask = [[NSURLSession sharedSession] dataTaskWithRequest:request
+                                                                        completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                                                                            // in case we want to know the response status code
+                                                                            //NSInteger HTTPStatusCode = [(NSHTTPURLResponse *)response statusCode];
+                                                                            
+                                                                            if (error != nil)
+                                                                            {
+                                                                                [[NSOperationQueue mainQueue] addOperationWithBlock: ^{
+                                                                                    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                                                                                    
+                                                                                    if ([error code] == NSURLErrorAppTransportSecurityRequiresSecureConnection)
+                                                                                    {
+                                                                                        // if you get error NSURLErrorAppTransportSecurityRequiresSecureConnection (-1022),
+                                                                                        // then your Info.plist has not been properly configured to match the target server.
+                                                                                        //
+                                                                                        abort();
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        [self handleError:error];
+                                                                                    }
+                                                                                }];
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                // create the queue to run our ParseOperation
+                                                                                self.queue = [[NSOperationQueue alloc] init];
+                                                                                
+                                                                                // create an ParseOperation (NSOperation subclass) to parse the RSS feed data so that the UI is not blocked
+                                                                                _parser = [[ParseOperation alloc] initWithData:data];
+                                                                                
+                                                                                __weak AppDelegate *weakSelf = self;
+                                                                                
+                                                                                self.parser.errorHandler = ^(NSError *parseError) {
+                                                                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                                                                        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                                                                                        [weakSelf handleError:parseError];
+                                                                                    });
+                                                                                };
+                                                                                
+                                                                                // referencing parser from within its completionBlock would create a retain cycle
+                                                                                __weak ParseOperation *weakParser = self.parser;
+                                                                                
+                                                                                self.parser.completionBlock = ^(void) {
+                                                                                    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                                                                                    if (weakParser.appRecordList != nil)
+                                                                                    {
+                                                                                        // The completion block may execute on any thread.  Because operations
+                                                                                        // involving the UI are about to be performed, make sure they execute on the main thread.
+                                                                                        //
+                                                                                        dispatch_async(dispatch_get_main_queue(), ^{
+                                                                                            // The root rootViewController is the only child of the navigation
+                                                                                            // controller, which is the window's rootViewController.
+                                                                                            //
+                                                                                            LatestViewController *rootViewController =
+                                                                                            (LatestViewController*)[(UINavigationController*)weakSelf.window.rootViewController topViewController];
+                                                                                            
+                                                                                            rootViewController.entries = weakParser.appRecordList;
+                                                                                            
+                                                                                            // tell our table view to reload its data, now that parsing has completed
+                                                                                            [rootViewController.tableView reloadData];
+                                                                                        });
+                                                                                    }
+                                                                                    
+                                                                                    // we are finished with the queue and our ParseOperation
+                                                                                    weakSelf.queue = nil;
+                                                                                };
+                                                                                
+                                                                                [self.queue addOperation:self.parser]; // this will start the "ParseOperation"
+                                                                            }
+                                                                        }];
+    
+    [sessionTask resume];
+    
+    // show in the status bar that network activity is starting
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    
     return YES;
 }
 
-
-- (void)applicationWillResignActive:(UIApplication *)application {
-    // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-    // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
-}
-
-
-- (void)applicationDidEnterBackground:(UIApplication *)application {
-    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-}
-
-
-- (void)applicationWillEnterForeground:(UIApplication *)application {
-    // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
-}
-
-
-- (void)applicationDidBecomeActive:(UIApplication *)application {
-    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-}
-
-
-- (void)applicationWillTerminate:(UIApplication *)application {
-    // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-}
-
-
-#pragma mark - Split view
-
-- (BOOL)splitViewController:(UISplitViewController *)splitViewController collapseSecondaryViewController:(UIViewController *)secondaryViewController ontoPrimaryViewController:(UIViewController *)primaryViewController {
-    if ([secondaryViewController isKindOfClass:[UINavigationController class]] && [[(UINavigationController *)secondaryViewController topViewController] isKindOfClass:[DetailViewController class]] && ([(DetailViewController *)[(UINavigationController *)secondaryViewController topViewController] detailItem] == nil)) {
-        // Return YES to indicate that we have handled the collapse by doing nothing; the secondary controller will be discarded.
-        return YES;
-    } else {
-        return NO;
-    }
+// -------------------------------------------------------------------------------
+//	handleError:error
+//  Reports any error with an alert which was received from connection or loading failures.
+// -------------------------------------------------------------------------------
+- (void)handleError:(NSError *)error
+{
+    NSString *errorMessage = [error localizedDescription];
+    
+    // alert user that our current record was deleted, and then we leave this view controller
+    //
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Cannot Show Top Paid Apps"
+                                                                   message:errorMessage
+                                                            preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction *OKAction = [UIAlertAction actionWithTitle:@"OK"
+                                                       style:UIAlertActionStyleDefault
+                                                     handler:^(UIAlertAction *action) {
+                                                         // dissmissal of alert completed
+                                                     }];
+    
+    [alert addAction:OKAction];
+    [self.window.rootViewController presentViewController:alert animated:YES completion:nil];
 }
 
 @end

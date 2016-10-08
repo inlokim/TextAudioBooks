@@ -19,6 +19,11 @@
 		312151321DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.xml in Resources */ = {isa = PBXBuildFile; fileRef = 3121512D1DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.xml */; };
 		312151331DA2920E00A69D9A /* list.xml in Resources */ = {isa = PBXBuildFile; fileRef = 3121512E1DA2920E00A69D9A /* list.xml */; };
 		312151341DA2920E00A69D9A /* iPhoneBack.png in Resources */ = {isa = PBXBuildFile; fileRef = 312151301DA2920E00A69D9A /* iPhoneBack.png */; };
+		312151471DA7E8A800A69D9A /* libnetwork.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 312151461DA7E8A800A69D9A /* libnetwork.tbd */; };
+		3121514E1DA9241900A69D9A /* IconDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 312151491DA9241900A69D9A /* IconDownloader.m */; };
+		3121514F1DA9241900A69D9A /* LatestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3121514B1DA9241900A69D9A /* LatestViewController.m */; };
+		312151501DA9241900A69D9A /* ParseOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 3121514D1DA9241900A69D9A /* ParseOperation.m */; };
+		312151531DA9243B00A69D9A /* AppRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 312151521DA9243B00A69D9A /* AppRecord.m */; };
 		7A41D33B1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7A41D33A1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png */; };
 		7A41D33F1DA5DFD3000D3AB1 /* BookTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D33E1DA5DFD3000D3AB1 /* BookTableViewCell.m */; };
 		7A41D3431DA62B61000D3AB1 /* ContentsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D3421DA62B61000D3AB1 /* ContentsViewController.m */; };
@@ -46,6 +51,15 @@
 		3121512D1DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = aroundtheworldineightydays_01_verne_64kb.xml; sourceTree = "<group>"; };
 		3121512E1DA2920E00A69D9A /* list.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = list.xml; sourceTree = "<group>"; };
 		312151301DA2920E00A69D9A /* iPhoneBack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = iPhoneBack.png; sourceTree = "<group>"; };
+		312151461DA7E8A800A69D9A /* libnetwork.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libnetwork.tbd; path = usr/lib/libnetwork.tbd; sourceTree = SDKROOT; };
+		312151481DA9241900A69D9A /* IconDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IconDownloader.h; sourceTree = "<group>"; };
+		312151491DA9241900A69D9A /* IconDownloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IconDownloader.m; sourceTree = "<group>"; };
+		3121514A1DA9241900A69D9A /* LatestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LatestViewController.h; sourceTree = "<group>"; };
+		3121514B1DA9241900A69D9A /* LatestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LatestViewController.m; sourceTree = "<group>"; };
+		3121514C1DA9241900A69D9A /* ParseOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseOperation.h; sourceTree = "<group>"; };
+		3121514D1DA9241900A69D9A /* ParseOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseOperation.m; sourceTree = "<group>"; };
+		312151511DA9243B00A69D9A /* AppRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppRecord.h; sourceTree = "<group>"; };
+		312151521DA9243B00A69D9A /* AppRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppRecord.m; sourceTree = "<group>"; };
 		7A41D33A1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "speaker_off~iphone@2x.png"; path = "images/speaker_off~iphone@2x.png"; sourceTree = "<group>"; };
 		7A41D33E1DA5DFD3000D3AB1 /* BookTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookTableViewCell.m; sourceTree = "<group>"; };
 		7A41D3401DA5E31F000D3AB1 /* BookTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookTableViewCell.h; sourceTree = "<group>"; };
@@ -63,6 +77,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				312151471DA7E8A800A69D9A /* libnetwork.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,6 +89,7 @@
 			children = (
 				31214FE21DA0E69200A69D9A /* TextAudioBooks */,
 				31214FE11DA0E69200A69D9A /* Products */,
+				312151451DA7E8A800A69D9A /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -152,28 +168,28 @@
 		3121511E1DA285B000A69D9A /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				312151211DA2869600A69D9A /* Book */,
-				3121511F1DA285F500A69D9A /* BookList */,
-				312151201DA2861900A69D9A /* MyLibrary */,
+				312151211DA2869600A69D9A /* Library */,
+				3121511F1DA285F500A69D9A /* Store */,
 			);
 			name = ViewController;
 			sourceTree = "<group>";
 		};
-		3121511F1DA285F500A69D9A /* BookList */ = {
+		3121511F1DA285F500A69D9A /* Store */ = {
 			isa = PBXGroup;
 			children = (
+				312151511DA9243B00A69D9A /* AppRecord.h */,
+				312151521DA9243B00A69D9A /* AppRecord.m */,
+				312151481DA9241900A69D9A /* IconDownloader.h */,
+				312151491DA9241900A69D9A /* IconDownloader.m */,
+				3121514A1DA9241900A69D9A /* LatestViewController.h */,
+				3121514B1DA9241900A69D9A /* LatestViewController.m */,
+				3121514C1DA9241900A69D9A /* ParseOperation.h */,
+				3121514D1DA9241900A69D9A /* ParseOperation.m */,
 			);
-			name = BookList;
+			name = Store;
 			sourceTree = "<group>";
 		};
-		312151201DA2861900A69D9A /* MyLibrary */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = MyLibrary;
-			sourceTree = "<group>";
-		};
-		312151211DA2869600A69D9A /* Book */ = {
+		312151211DA2869600A69D9A /* Library */ = {
 			isa = PBXGroup;
 			children = (
 				312151381DA6866D00A69D9A /* Cover */,
@@ -183,7 +199,7 @@
 				7A41D3401DA5E31F000D3AB1 /* BookTableViewCell.h */,
 				7A41D33E1DA5DFD3000D3AB1 /* BookTableViewCell.m */,
 			);
-			name = Book;
+			name = Library;
 			sourceTree = "<group>";
 		};
 		312151291DA291FF00A69D9A /* Sample */ = {
@@ -228,6 +244,14 @@
 				7A41D3461DA7621E000D3AB1 /* BookCoverViewController.m */,
 			);
 			name = Cover;
+			sourceTree = "<group>";
+		};
+		312151451DA7E8A800A69D9A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				312151461DA7E8A800A69D9A /* libnetwork.tbd */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		7A41D3411DA62B3F000D3AB1 /* Contents */ = {
@@ -322,11 +346,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3121514E1DA9241900A69D9A /* IconDownloader.m in Sources */,
 				7A41D3471DA7621E000D3AB1 /* BookCoverViewController.m in Sources */,
 				7A41D3431DA62B61000D3AB1 /* ContentsViewController.m in Sources */,
+				312151531DA9243B00A69D9A /* AppRecord.m in Sources */,
 				312151281DA28EE000A69D9A /* BookViewController.m in Sources */,
 				31214FE81DA0E69200A69D9A /* AppDelegate.m in Sources */,
 				31214FEB1DA0E69200A69D9A /* MasterViewController.m in Sources */,
+				3121514F1DA9241900A69D9A /* LatestViewController.m in Sources */,
+				312151501DA9241900A69D9A /* ParseOperation.m in Sources */,
 				7A41D33F1DA5DFD3000D3AB1 /* BookTableViewCell.m in Sources */,
 				7AA049CD1DA37C0F006A8CB4 /* Utils.m in Sources */,
 				31214FE51DA0E69200A69D9A /* main.m in Sources */,
@@ -450,7 +478,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = JN4U23SWSX;
 				INFOPLIST_FILE = TextAudioBooks/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = kr.co.highwill.TextAudioBooks;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -463,7 +491,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = JN4U23SWSX;
 				INFOPLIST_FILE = TextAudioBooks/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = kr.co.highwill.TextAudioBooks;
 				PRODUCT_NAME = "$(TARGET_NAME)";
