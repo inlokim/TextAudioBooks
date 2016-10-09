@@ -24,6 +24,8 @@
 		3121514F1DA9241900A69D9A /* LatestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3121514B1DA9241900A69D9A /* LatestViewController.m */; };
 		312151501DA9241900A69D9A /* ParseOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 3121514D1DA9241900A69D9A /* ParseOperation.m */; };
 		312151531DA9243B00A69D9A /* AppRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 312151521DA9243B00A69D9A /* AppRecord.m */; };
+		312151561DAA45E400A69D9A /* StoreCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 312151551DAA45E400A69D9A /* StoreCell.m */; };
+		312151591DAA658000A69D9A /* CustomCellBackground.m in Sources */ = {isa = PBXBuildFile; fileRef = 312151581DAA658000A69D9A /* CustomCellBackground.m */; };
 		7A41D33B1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7A41D33A1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png */; };
 		7A41D33F1DA5DFD3000D3AB1 /* BookTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D33E1DA5DFD3000D3AB1 /* BookTableViewCell.m */; };
 		7A41D3431DA62B61000D3AB1 /* ContentsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D3421DA62B61000D3AB1 /* ContentsViewController.m */; };
@@ -60,6 +62,10 @@
 		3121514D1DA9241900A69D9A /* ParseOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseOperation.m; sourceTree = "<group>"; };
 		312151511DA9243B00A69D9A /* AppRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppRecord.h; sourceTree = "<group>"; };
 		312151521DA9243B00A69D9A /* AppRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppRecord.m; sourceTree = "<group>"; };
+		312151541DAA45E400A69D9A /* StoreCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoreCell.h; sourceTree = "<group>"; };
+		312151551DAA45E400A69D9A /* StoreCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StoreCell.m; sourceTree = "<group>"; };
+		312151571DAA658000A69D9A /* CustomCellBackground.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomCellBackground.h; sourceTree = "<group>"; };
+		312151581DAA658000A69D9A /* CustomCellBackground.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomCellBackground.m; sourceTree = "<group>"; };
 		7A41D33A1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "speaker_off~iphone@2x.png"; path = "images/speaker_off~iphone@2x.png"; sourceTree = "<group>"; };
 		7A41D33E1DA5DFD3000D3AB1 /* BookTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookTableViewCell.m; sourceTree = "<group>"; };
 		7A41D3401DA5E31F000D3AB1 /* BookTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookTableViewCell.h; sourceTree = "<group>"; };
@@ -112,8 +118,6 @@
 				3121511A1DA2857300A69D9A /* Images */,
 				31214FE91DA0E69200A69D9A /* MasterViewController.h */,
 				31214FEA1DA0E69200A69D9A /* MasterViewController.m */,
-				31214FEC1DA0E69200A69D9A /* DetailViewController.h */,
-				31214FED1DA0E69200A69D9A /* DetailViewController.m */,
 				31214FEF1DA0E69200A69D9A /* Main.storyboard */,
 				31214FF21DA0E69200A69D9A /* Assets.xcassets */,
 				31214FF41DA0E69200A69D9A /* LaunchScreen.storyboard */,
@@ -177,12 +181,18 @@
 		3121511F1DA285F500A69D9A /* Store */ = {
 			isa = PBXGroup;
 			children = (
+				312151571DAA658000A69D9A /* CustomCellBackground.h */,
+				312151581DAA658000A69D9A /* CustomCellBackground.m */,
+				312151541DAA45E400A69D9A /* StoreCell.h */,
+				312151551DAA45E400A69D9A /* StoreCell.m */,
 				312151511DA9243B00A69D9A /* AppRecord.h */,
 				312151521DA9243B00A69D9A /* AppRecord.m */,
 				312151481DA9241900A69D9A /* IconDownloader.h */,
 				312151491DA9241900A69D9A /* IconDownloader.m */,
 				3121514A1DA9241900A69D9A /* LatestViewController.h */,
 				3121514B1DA9241900A69D9A /* LatestViewController.m */,
+				31214FEC1DA0E69200A69D9A /* DetailViewController.h */,
+				31214FED1DA0E69200A69D9A /* DetailViewController.m */,
 				3121514C1DA9241900A69D9A /* ParseOperation.h */,
 				3121514D1DA9241900A69D9A /* ParseOperation.m */,
 			);
@@ -349,6 +359,8 @@
 				3121514E1DA9241900A69D9A /* IconDownloader.m in Sources */,
 				7A41D3471DA7621E000D3AB1 /* BookCoverViewController.m in Sources */,
 				7A41D3431DA62B61000D3AB1 /* ContentsViewController.m in Sources */,
+				312151591DAA658000A69D9A /* CustomCellBackground.m in Sources */,
+				312151561DAA45E400A69D9A /* StoreCell.m in Sources */,
 				312151531DA9243B00A69D9A /* AppRecord.m in Sources */,
 				312151281DA28EE000A69D9A /* BookViewController.m in Sources */,
 				31214FE81DA0E69200A69D9A /* AppDelegate.m in Sources */,

@@ -22,7 +22,5 @@
 @synthesize downloadFlag;
 @synthesize fullFlag;
 
-
-
 @end
 

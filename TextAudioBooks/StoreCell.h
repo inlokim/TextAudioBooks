@@ -6,11 +6,12 @@ Abstract:
 Custom collection view cell for image and its label.
 */
 
-@import UIKit;
+#import <UIKit/UIKit.h>
 
-@interface StoreCell : UICollectionViewCell
+@interface StoreCell : UITableViewCell
 
-@property (strong, nonatomic) IBOutlet UIImageView *image;
-@property (strong, nonatomic) IBOutlet UILabel *label;
+@property (strong, nonatomic) IBOutlet UIImageView *imageView;
+@property (strong, nonatomic) IBOutlet UILabel *titleLabel;
+@property (strong, nonatomic) IBOutlet UILabel *authorLabel;
 
 @end

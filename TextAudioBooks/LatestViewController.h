@@ -17,7 +17,7 @@
  If rapid scrolling is in progress, downloads do not begin until scrolling has ended.
  */
 
-@import UIKit;
+#import <UIKit/UIKit.h>
 
 @interface LatestViewController : UITableViewController
 

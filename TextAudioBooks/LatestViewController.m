@@ -18,6 +18,7 @@
  */
 
 #import "LatestViewController.h"
+#import "StoreCell.h"
 #import "AppRecord.h"
 #import "IconDownloader.h"
 
@@ -49,10 +50,10 @@ static NSString *PlaceholderCellIdentifier = @"PlaceholderCell";
     [super viewDidLoad];
     
     
-    [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:CellIdentifier];
+    //[self.tableView registerClass:[StoreCell class] forCellReuseIdentifier:CellIdentifier];
     
     
-    [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:PlaceholderCellIdentifier];
+    [self.tableView registerClass:[StoreCell class] forCellReuseIdentifier:PlaceholderCellIdentifier];
     
     
     _imageDownloadsInProgress = [NSMutableDictionary dictionary];
@@ -115,7 +116,7 @@ static NSString *PlaceholderCellIdentifier = @"PlaceholderCell";
 // -------------------------------------------------------------------------------
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = nil;
+    StoreCell *cell = nil;
     
     NSUInteger nodeCount = self.entries.count;
     
@@ -134,8 +135,10 @@ static NSString *PlaceholderCellIdentifier = @"PlaceholderCell";
             // Set up the cell representing the app
             AppRecord *appRecord = (self.entries)[indexPath.row];
             
-            cell.textLabel.text = appRecord.title;
-            cell.detailTextLabel.text = appRecord.author;
+            cell.titleLabel.text= appRecord.title;
+            cell.authorLabel.text = appRecord.author;
+
+            NSLog(@"author : %@", appRecord.author);
             
             // Only load cached images; defer new downloads until scrolling ends
             if (!appRecord.appIcon)

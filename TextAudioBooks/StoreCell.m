@@ -9,8 +9,13 @@ Custom collection view cell for image and its label.
 #import "StoreCell.h"
 #import "CustomCellBackground.h"
 
-@implementation StoreCell
 
+@implementation StoreCell
+@synthesize titleLabel;
+@synthesize authorLabel;
+@synthesize imageView;
+
+/*
 - (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
     self = [super initWithCoder:aDecoder];
@@ -22,5 +27,34 @@ Custom collection view cell for image and its label.
     }
     return self;
 }
+*/
 
+
+/*
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        // Initialization code
+    }
+    return self;
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated
+{
+    [super setSelected:selected animated:animated];
+    
+    // Configure the view for the selected state
+}
+*/
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    [self.contentView layoutIfNeeded];
+    self.titleLabel.preferredMaxLayoutWidth = CGRectGetWidth(self.titleLabel.frame);
+}
+
+ 
 @end
