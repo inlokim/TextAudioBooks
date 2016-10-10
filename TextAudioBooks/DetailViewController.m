@@ -9,41 +9,31 @@
 #import "DetailViewController.h"
 
 @interface DetailViewController ()
+{
+    
+}
 
 @end
 
 @implementation DetailViewController
 
-- (void)configureView {
-    // Update the user interface for the detail item.
-    if (self.detailItem) {
-        self.detailDescriptionLabel.text = [self.detailItem description];
-    }
-}
+@synthesize appRecord;
 
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    self.title = appRecord.title;
+    
     // Do any additional setup after loading the view, typically from a nib.
-    [self configureView];
+    NSLog(@"appRecord.title :%@", appRecord.title);
+    
 }
 
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-}
-
-
-#pragma mark - Managing the detail item
-
-- (void)setDetailItem:(NSDate *)newDetailItem {
-    if (_detailItem != newDetailItem) {
-        _detailItem = newDetailItem;
-         
-        // Update the view.
-        [self configureView];
-    }
 }
 
 

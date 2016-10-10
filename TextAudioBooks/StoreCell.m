@@ -7,8 +7,8 @@ Custom collection view cell for image and its label.
 */
 
 #import "StoreCell.h"
-#import "CustomCellBackground.h"
-
+//#import "CustomCellBackground.h"
+#import "QuartzCore/QuartzCore.h"
 
 @implementation StoreCell
 @synthesize titleLabel;
@@ -30,7 +30,7 @@ Custom collection view cell for image and its label.
 */
 
 
-/*
+
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
@@ -46,7 +46,7 @@ Custom collection view cell for image and its label.
     
     // Configure the view for the selected state
 }
-*/
+/*
 
 - (void)layoutSubviews
 {
@@ -55,6 +55,6 @@ Custom collection view cell for image and its label.
     [self.contentView layoutIfNeeded];
     self.titleLabel.preferredMaxLayoutWidth = CGRectGetWidth(self.titleLabel.frame);
 }
-
+*/
  
 @end

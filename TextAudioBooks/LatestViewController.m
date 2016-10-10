@@ -18,6 +18,7 @@
  */
 
 #import "LatestViewController.h"
+#import "DetailViewController.h"
 #import "StoreCell.h"
 #import "AppRecord.h"
 #import "IconDownloader.h"
@@ -138,7 +139,10 @@ static NSString *PlaceholderCellIdentifier = @"PlaceholderCell";
             cell.titleLabel.text= appRecord.title;
             cell.authorLabel.text = appRecord.author;
 
-            NSLog(@"author : %@", appRecord.author);
+            //NSLog(@"author : %@", appRecord.author);
+            
+            [cell.imageView.layer setBorderColor: [[UIColor grayColor] CGColor]];
+            [cell.imageView.layer setBorderWidth: 2.0];
             
             // Only load cached images; defer new downloads until scrolling ends
             if (!appRecord.appIcon)
@@ -158,6 +162,33 @@ static NSString *PlaceholderCellIdentifier = @"PlaceholderCell";
     }
     
     return cell;
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row % 2)
+    {
+        [cell setBackgroundColor:[UIColor colorWithRed:.97 green:.97 blue:.97 alpha:1]];
+    }
+    else [cell setBackgroundColor:[UIColor whiteColor]];
+}
+
+
+
+#pragma mark - Segues
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if ([[segue identifier] isEqualToString:@"showDetail"])
+    {
+        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+        AppRecord *appRecord = (self.entries)[indexPath.row];
+        
+        //NSDate *object = self.objects[indexPath.row];
+        DetailViewController *controller =
+        (DetailViewController *)[segue destinationViewController];
+        
+        [controller setAppRecord:appRecord];
+    }
 }
 
 

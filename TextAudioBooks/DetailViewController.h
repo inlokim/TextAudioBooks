@@ -7,11 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AppRecord.h"
 
 @interface DetailViewController : UIViewController
 
-@property (strong, nonatomic) NSDate *detailItem;
-@property (weak, nonatomic) IBOutlet UILabel *detailDescriptionLabel;
+
+@property (strong, nonatomic) AppRecord *appRecord;
+
 
 @end
 

@@ -12,11 +12,6 @@
 #import "ParseOperation.h"
 #import "AppRecord.h"
 
-
-// the http URL used for fetching the top iOS paid apps on the App Store
-//static NSString *const TopPaidAppsFeed =
-//@"http://phobos.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toppaidapplications/limit=75/xml";
-
 static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php";
 
 @interface AppDelegate ()
@@ -29,7 +24,6 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
 
 @end
 
-
 #pragma mark -
 
 @implementation AppDelegate
@@ -39,7 +33,7 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
 // -------------------------------------------------------------------------------
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:latestList]];
+ /*   NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:latestList]];
     
     // create an session data task to obtain and the XML feed
     NSURLSessionDataTask *sessionTask = [[NSURLSession sharedSession] dataTaskWithRequest:request
@@ -115,9 +109,9 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
                                                                         }];
     
     [sessionTask resume];
-    
+    */
     // show in the status bar that network activity is starting
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    //[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     
     return YES;
 }
