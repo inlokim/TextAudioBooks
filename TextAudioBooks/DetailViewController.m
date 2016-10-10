@@ -10,6 +10,7 @@
 
 @interface DetailViewController ()
 {
+    IBOutlet UIScrollView *scrollView;
     IBOutlet UILabel *authorLabel;
     IBOutlet UILabel *titleLabel;
     IBOutlet UILabel *readByLabel;
