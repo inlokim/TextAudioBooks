@@ -9,6 +9,6 @@
 @interface Utils : NSObject
 
 + (NSString *)homeDir;
-+ (NSString *)cacheDir;
+//+ (NSString *)cacheDir;
 
 @end

@@ -15,16 +15,20 @@
 + (NSString *)homeDir
 {
     NSArray *paths =
-    NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    //NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    
     return paths[0];
 }
 
-
+/*
 + (NSString *)cacheDir
 {
     NSArray *paths =
     NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     return paths[0];
 }
+*/
+
 
 @end

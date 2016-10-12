@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "AppRecord.h"
 
-@interface DetailViewController : UIViewController
+@interface DetailViewController : UIViewController <NSURLSessionDelegate>
 
 
 @property (strong, nonatomic) AppRecord *appRecord;
