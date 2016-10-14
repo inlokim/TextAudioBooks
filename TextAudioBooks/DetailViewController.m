@@ -15,7 +15,7 @@
 
 #define SAMPLE NO
 #define FULL YES
-
+#define MYBOOKS_PLIST  @"myBooks.plist"
 
 static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 
@@ -47,10 +47,6 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 @property (nonatomic, strong) NSURLSession *session;
 @property (nonatomic, strong) NSMutableArray *arrFileDownloadData;
 @property (nonatomic, strong) NSURL *docDirectoryURL;
-
-
-
-
 
 @end
 
@@ -111,7 +107,7 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 {
     [contentLabel sizeToFit];
     
-    NSLog(@"%@", NSStringFromCGRect(contentLabel.frame));
+    //NSLog(@"%@", NSStringFromCGRect(contentLabel.frame));
     
     [scrollView setContentSize:CGSizeMake(CGRectGetWidth(self.view.frame), CGRectGetHeight(contentLabel.frame) + 340)];
 }
@@ -136,10 +132,83 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 - (IBAction)getSampleButtonPressed:(id)sender {
     
     downloadType = SAMPLE;
+    [self savePersistence];
+    [self saveSmallCoverImage];
     [self startDownload];
 }
 
 #pragma mark - File Download
+
+-(void) savePersistence
+{
+    NSLog(@"START ************   savePersistence  *****************");
+    NSMutableArray *array = nil;
+    NSString *homeDir = [Utils homeDir];
+    NSString *plist = [homeDir stringByAppendingPathComponent:MYBOOKS_PLIST];
+    
+    //myBooks.plist로부터 데이터를 가져온다.
+    if ([[NSFileManager defaultManager] fileExistsAtPath:plist])
+        array = [[NSMutableArray alloc] initWithContentsOfFile:plist];
+    else
+        array = [[NSMutableArray alloc] init];
+    
+    NSLog(@"array count = %d",[array count]);
+    
+    //myBooks.plist안에 샘플 정보가 있다면 삭제한다.
+    for (int i=0; i < [array count] ; i ++)
+    {
+        NSString *string = [array objectAtIndex:i];
+        NSArray *chunks = [string componentsSeparatedByString: @":"];
+        
+        NSString *mybookId = [chunks objectAtIndex:0];
+        NSString *mybookType = [chunks objectAtIndex:3];
+        
+        NSLog(@"bookId : %@   bookType : %@ ",mybookId, mybookType);
+        
+        if ([mybookId isEqualToString:appRecord.bookId] &&
+            [mybookType isEqualToString:@"1"]) //sample
+        {
+            NSLog(@"appRecord.bookId : %@   mybookId : %@ mybookType :%@",appRecord.bookId, mybookId, mybookType);
+            
+            [array removeObjectAtIndex:i];
+        }
+    }
+    
+    //BookType sample=1, buy=2
+    if (downloadType == SAMPLE) appRecord.bookType = @"1";
+    else if (downloadType == FULL) appRecord.bookType = @"2";
+    
+    //download = 1, complete = 2
+    
+    [array addObject:
+     [NSString stringWithFormat:@"%@:%@:%@:%@",appRecord.bookId, appRecord.title, appRecord.author, appRecord.bookType]];
+    
+    [array writeToFile:plist atomically:YES];
+    
+    NSLog(@"END ************   savePersistence  *****************");
+}
+
+// -------------------------------------------------------------------------------
+//	image를 파일로 저장
+// -------------------------------------------------------------------------------
+
+-(void)saveSmallCoverImage
+{
+    NSLog(@"saveSmallCoverImage");
+    //NSString *homeDir = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"];
+    NSString *homeDir = [Utils homeDir];
+    NSString *imageFile = [NSString stringWithFormat:@"%@/%@_cover.png", homeDir,appRecord.bookId];
+    NSLog(@"imageFile=%@",imageFile);
+    
+    if (![[NSFileManager defaultManager] fileExistsAtPath:imageFile])
+    {
+        NSLog(@"[NSFileManager defaultManager");
+        //UIImage *img = appRecord.appIcon;
+        NSData *dataObj = UIImagePNGRepresentation(imageView.image);
+        [dataObj writeToFile:imageFile atomically:YES];
+    }
+}
+
 
 -(void)initializeFileDownloadDataArray
 {

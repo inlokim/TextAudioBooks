@@ -49,6 +49,8 @@
 		7A41D3BA1DACAEA7000D3AB1 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A41D3B91DACAEA7000D3AB1 /* libz.tbd */; };
 		7A41D3BE1DADDF38000D3AB1 /* MyBooksListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D3BD1DADDF38000D3AB1 /* MyBooksListViewController.m */; };
 		7A41D3C21DADFE35000D3AB1 /* StoreCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D3C11DADFE35000D3AB1 /* StoreCell.m */; };
+		7A41D3CB1DAF5376000D3AB1 /* CustomSegue.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D3C91DAF5376000D3AB1 /* CustomSegue.m */; };
+		7A41D3CE1DAF539E000D3AB1 /* CustomUnwindSegue.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D3CD1DAF539E000D3AB1 /* CustomUnwindSegue.m */; };
 		7AA049CD1DA37C0F006A8CB4 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AA049CC1DA37C0F006A8CB4 /* Utils.m */; };
 		7AA049CF1DA4BF38006A8CB4 /* play-off~iphone@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7AA049CE1DA4BF38006A8CB4 /* play-off~iphone@3x.png */; };
 /* End PBXBuildFile section */
@@ -134,6 +136,10 @@
 		7A41D3BC1DADDF38000D3AB1 /* MyBooksListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyBooksListViewController.h; sourceTree = "<group>"; };
 		7A41D3BD1DADDF38000D3AB1 /* MyBooksListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyBooksListViewController.m; sourceTree = "<group>"; };
 		7A41D3C11DADFE35000D3AB1 /* StoreCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StoreCell.m; sourceTree = "<group>"; };
+		7A41D3C81DAF5376000D3AB1 /* CustomSegue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomSegue.h; sourceTree = "<group>"; };
+		7A41D3C91DAF5376000D3AB1 /* CustomSegue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomSegue.m; sourceTree = "<group>"; };
+		7A41D3CC1DAF539E000D3AB1 /* CustomUnwindSegue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomUnwindSegue.h; sourceTree = "<group>"; };
+		7A41D3CD1DAF539E000D3AB1 /* CustomUnwindSegue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomUnwindSegue.m; sourceTree = "<group>"; };
 		7AA049CB1DA37C0F006A8CB4 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		7AA049CC1DA37C0F006A8CB4 /* Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
 		7AA049CE1DA4BF38006A8CB4 /* play-off~iphone@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "play-off~iphone@3x.png"; path = "images/play-off~iphone@3x.png"; sourceTree = "<group>"; };
@@ -424,6 +430,7 @@
 		7A41D3C01DADF76E000D3AB1 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				7A41D3CF1DAF53A6000D3AB1 /* Segue */,
 				312151511DA9243B00A69D9A /* AppRecord.h */,
 				312151521DA9243B00A69D9A /* AppRecord.m */,
 				312151481DA9241900A69D9A /* IconDownloader.h */,
@@ -432,6 +439,17 @@
 				3121514D1DA9241900A69D9A /* ParseOperation.m */,
 			);
 			name = Common;
+			sourceTree = "<group>";
+		};
+		7A41D3CF1DAF53A6000D3AB1 /* Segue */ = {
+			isa = PBXGroup;
+			children = (
+				7A41D3CC1DAF539E000D3AB1 /* CustomUnwindSegue.h */,
+				7A41D3CD1DAF539E000D3AB1 /* CustomUnwindSegue.m */,
+				7A41D3C81DAF5376000D3AB1 /* CustomSegue.h */,
+				7A41D3C91DAF5376000D3AB1 /* CustomSegue.m */,
+			);
+			name = Segue;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -537,8 +555,10 @@
 				7A41D3A81DACA936000D3AB1 /* zip.c in Sources */,
 				3121514F1DA9241900A69D9A /* LatestViewController.m in Sources */,
 				7A41D39D1DACA936000D3AB1 /* aestab.c in Sources */,
+				7A41D3CB1DAF5376000D3AB1 /* CustomSegue.m in Sources */,
 				7A41D3A21DACA936000D3AB1 /* pwd2key.c in Sources */,
 				7A41D3A11DACA936000D3AB1 /* prng.c in Sources */,
+				7A41D3CE1DAF539E000D3AB1 /* CustomUnwindSegue.m in Sources */,
 				7A41D3C21DADFE35000D3AB1 /* StoreCell.m in Sources */,
 				312151501DA9241900A69D9A /* ParseOperation.m in Sources */,
 				7A41D3BE1DADDF38000D3AB1 /* MyBooksListViewController.m in Sources */,

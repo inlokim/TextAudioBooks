@@ -7,7 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AppRecord.h"
+
 
 @interface ContentsViewController : UITableViewController <NSXMLParserDelegate>
+
+@property (strong, nonatomic) AppRecord *appRecord;
 
 @end

@@ -30,5 +30,14 @@
 }
 */
 
++ (NSString *)fileDir :(NSString *)bookType bookId:(NSString *)bookId
+{
+    NSString *myFlag;
+    if ([bookType isEqualToString:@"1"]) myFlag = @"_preview";
+    else if ([bookType isEqualToString:@"2"]) myFlag = @"_full";
+    
+    return [bookId stringByAppendingString:myFlag];
+}
+
 
 @end

@@ -49,8 +49,8 @@
 
 @implementation BookViewController
 
-@synthesize fileID;
-@synthesize title;
+@synthesize appRecord;
+@synthesize fileId;
 
 static NSString *cellIdentifier = @"MyCell";
 
@@ -63,10 +63,7 @@ void RouteChangeListener(void *                  inClientData,
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.title = title;
-    
-    
-    NSLog(@"title : %@, fileID : %@", title, fileID);
+    self.title = appRecord.title;
     
     firstTime = TRUE;
     currentRow = 0;
@@ -142,32 +139,29 @@ void RouteChangeListener(void *                  inClientData,
 
 #pragma mark - ViewDisplay
 
+
 - (void)XMLSetup
 {
     xmlExists = false;
     
-    NSString *xmlFile = [NSString stringWithFormat:@"%@/out/%@",[Utils homeDir], @"lesson1.xml" ];
-    NSString *path;
+    NSString *fileName = [Utils fileDir:appRecord.bookType bookId:appRecord.bookId];
+    NSString *path =
+    [NSString stringWithFormat:@"%@/%@/audios/%@.xml", [Utils homeDir], fileName, fileId];
     
-    if ([[NSFileManager defaultManager] fileExistsAtPath:xmlFile])
+    if ([[NSFileManager defaultManager] fileExistsAtPath:path])
     {
-        path = xmlFile;
-        xmlExists = true;
+        xmlParser = [[NSXMLParser alloc] initWithData:[NSData dataWithContentsOfFile:path]];
+        foundValue = [[NSMutableString alloc] init];
+        xmlParser.delegate = self;
+        [xmlParser parse];
     }
-    else {
-        //use Sample file
-        path = [[NSBundle mainBundle] pathForResource:fileID ofType:@"xml"];
-    }
-    
-    xmlParser = [[NSXMLParser alloc] initWithData:[NSData dataWithContentsOfFile:path]];
-    foundValue = [[NSMutableString alloc] init];
-    xmlParser.delegate = self;
-    [xmlParser parse];
 }
+
 
 #pragma mark - NSXMLParser
 
--(void)parserDidStartDocument:(NSXMLParser *)parser{
+-(void)parserDidStartDocument:(NSXMLParser *)parser
+{
     // Initialize the neighbours data array.
     arrNeighboursData = [[NSMutableArray alloc] init];
 }
@@ -230,11 +224,6 @@ void RouteChangeListener(void *                  inClientData,
 
 #pragma mark - ViewController
 
-- (void)viewWillAppear:(BOOL)animated {
-    //    self.clearsSelectionOnViewWillAppear = self.splitViewController.isCollapsed;
-    [super viewWillAppear:animated];
-}
-
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
@@ -287,9 +276,9 @@ void RouteChangeListener(void *                  inClientData,
 - (void) loadAudio
 {
     
-    //NSString *file = [NSString stringWithFormat:@"%@/audios/%@.mp3",path,keyValue];
-    
-    NSString * path = [[NSBundle mainBundle] pathForResource:@"aroundtheworldineightydays_01_verne_64kb" ofType:@"mp3"];
+    NSString *fileName = [Utils fileDir:appRecord.bookType bookId:appRecord.bookId];
+    NSString *path =
+    [NSString stringWithFormat:@"%@/%@/audios/%@.mp3", [Utils homeDir], fileName, fileId];
     
     player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:path] error:nil];
     
@@ -505,6 +494,18 @@ void RouteChangeListener(void *                  inClientData,
     [self startPlayer:p];
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    [[UIApplication sharedApplication] setStatusBarHidden:YES];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+}
 
 
 @end

@@ -7,6 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AppRecord.h"
 
 @interface BookCoverViewController : UIViewController
+
+@property (strong, nonatomic) AppRecord *appRecord;
+
+
 @end

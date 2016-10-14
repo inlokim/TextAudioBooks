@@ -10,5 +10,5 @@
 
 + (NSString *)homeDir;
 //+ (NSString *)cacheDir;
-
++ (NSString *)fileDir :(NSString *)bookType bookId:(NSString *)bookId;
 @end

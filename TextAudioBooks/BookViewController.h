@@ -7,12 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AppRecord.h"
+
 
 @import AVFoundation;
 
 @interface BookViewController : UITableViewController <NSXMLParserDelegate,  AVAudioPlayerDelegate>
 
-@property (strong, nonatomic) NSString *fileID;
-@property (strong, nonatomic) NSString *title;
+@property (strong, nonatomic) AppRecord *appRecord;
+@property (strong, nonatomic) NSString *fileId;
 
 @end

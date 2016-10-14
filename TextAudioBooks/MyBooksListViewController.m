@@ -18,28 +18,23 @@
  */
 
 #import "MyBooksListViewController.h"
-#import "DetailViewController.h"
-#import "StoreCell.h"
+#import "Utils.h"
 #import "AppRecord.h"
-#import "IconDownloader.h"
-#import "ParseOperation.h"
+#import "StoreCell.h"
+#import "BookCoverViewController.h"
+#import "CustomSegue.h"
+#import "CustomUnwindSegue.h"
 
-#define kCustomRowCount 7
-
-static NSString *CellIdentifier = @"LazyTableCell";
-static NSString *PlaceholderCellIdentifier = @"PlaceholderCell";
+#define MYBOOKS_PLIST  @"myBooks.plist"
 
 
 #pragma mark -
 
-@interface MyBooksListViewController () <UIScrollViewDelegate>
-
-// the set of IconDownloader objects for each app
-@property (nonatomic, strong) NSMutableDictionary *imageDownloadsInProgress;
-// the queue to run our "ParseOperation"
-@property (nonatomic, strong) NSOperationQueue *queue;
-// the NSOperation driving the parsing of the RSS feed
-@property (nonatomic, strong) ParseOperation *parser;
+@interface MyBooksListViewController ()
+{
+    NSArray *entries;
+    AppRecord *aBook;
+}
 
 @end
 
@@ -47,14 +42,25 @@ static NSString *PlaceholderCellIdentifier = @"PlaceholderCell";
 #pragma mark -
 
 @implementation MyBooksListViewController
-static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php";
+
+static NSString *CellIdentifier = @"MyBooksCell";
+//static NSString *PlaceholderCellIdentifier = @"PlaceholderCell";
 
 // -------------------------------------------------------------------------------
 //	viewDidLoad
 // -------------------------------------------------------------------------------
 - (void)viewDidLoad
 {
- 
+    [super viewDidLoad];
+
+       // [self.tableView registerClass:[StoreCell class] forCellReuseIdentifier:CellIdentifier];
+    
+    [self getPesistence];
+    
+    NSLog(@"entries count : %d", (int)entries.count);
+    
+    [self.tableView reloadData];
+
 }
 // -------------------------------------------------------------------------------
 //	didReceiveMemoryWarning
@@ -63,74 +69,130 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
 {
     [super didReceiveMemoryWarning];
 }
+/*
+- (void)viewWillAppear:(BOOL)animated
+{
+    NSLog(@"viewWillAppear");
+    
+    [self.tableView reloadData];
+}
+*/
+
+#pragma mark - loadTableData
+
+
+- (void)getPesistence
+{
+    NSString *filePath =
+    [[Utils homeDir] stringByAppendingPathComponent:MYBOOKS_PLIST];
+
+    NSMutableArray *myBooks = [[NSMutableArray alloc] initWithCapacity:10];
+    /*
+     myBooks.plist 구조
+     <plist version="1.0">
+     <array>
+     <string>chimes:The Chimes:Charles Dickens:1</string>
+     <string>Tales_From_Shakespeare2:Tales From Shakespeare Vol.2:Charles Lamb, Mary Lamb:1</string>
+     </array>
+     </plist>
+     */
+    
+    //BookType sample=1, buy=2
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath])
+    {
+        NSArray *array = [[NSArray alloc] initWithContentsOfFile:filePath];
+        NSLog(@"array count = %ld",[array count]);
+        
+        
+        // for (int i=0; i < [array count] ; i ++)
+        for (int i=(int)[array count]-1 ; i >= 0 ; i --)
+        {
+            //역순으로 넣기
+            NSString *string = [array objectAtIndex:i];
+            NSArray *chunks = [string componentsSeparatedByString: @":"];
+            
+            AppRecord  *appRecord =[[AppRecord alloc]init];
+            appRecord.bookId = [chunks objectAtIndex:0];
+            NSLog(@"aBook.bookId=%@",appRecord.bookId);
+            
+            NSLog(@"chunks2 : %@ ",[chunks objectAtIndex:2]);
+            NSLog(@"chunks3 : %@ ",[chunks objectAtIndex:3]);
+            //NSLog(@"chunks4 : %@ ",[chunks objectAtIndex:4]);
+            
+            NSLog(@"chunks count : %ld", chunks.count);
+            
+            if (chunks.count > 1)
+            {
+                appRecord.title = [chunks objectAtIndex:1];
+                NSLog(@"title : %@ ",[chunks objectAtIndex:1]);
+            }
+            
+            if (chunks.count > 2)
+            {
+                appRecord.author = [chunks objectAtIndex:2];
+                NSLog(@"author : %@ ",[chunks objectAtIndex:2]);
+            }
+            
+            if (chunks.count > 3)
+            {
+                appRecord.bookType = [chunks objectAtIndex:3];
+                NSLog(@"bookType : %@ ",[chunks objectAtIndex:3]);
+            }
+            
+            [myBooks addObject:appRecord];
+            
+            /******************************
+             GET Local Image
+             ******************************/
+            NSString *fileName =
+            [NSString stringWithFormat:@"%@/%@_cover.png", [Utils homeDir], appRecord.bookId];
+            
+            appRecord.localImageURL = fileName;
+            NSLog(@"aBook.localImageURL=%@",appRecord.localImageURL);
+        }
+        
+        entries = myBooks;
+    }
+}
+
+
 
 
 #pragma mark - UITableViewDataSource
 
-// -------------------------------------------------------------------------------
-//	tableView:numberOfRowsInSection:
-//  Customize the number of rows in the table view.
-// -------------------------------------------------------------------------------
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    // Return the number of sections.
+    return 1;
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    NSUInteger count = self.entries.count;
-    
-    // if there's no data yet, return enough rows to fill the screen
-    if (count == 0)
-    {
-        return kCustomRowCount;
-    }
-    return count;
+    // Return the number of rows in the section.
+    return entries.count;
 }
+
 
 // -------------------------------------------------------------------------------
 //	tableView:cellForRowAtIndexPath:
 // -------------------------------------------------------------------------------
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    StoreCell *cell = nil;
+    //StoreCell *cell = nil;
+    StoreCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
-    NSUInteger nodeCount = self.entries.count;
+    // Set up the cell representing the app
+    AppRecord * appRecord = [entries objectAtIndex:indexPath.row];
     
-    if (nodeCount == 0 && indexPath.row == 0)
-    {
-        // add a placeholder cell while waiting on table data
-        cell = [tableView dequeueReusableCellWithIdentifier:PlaceholderCellIdentifier forIndexPath:indexPath];
-    }
-    else
-    {
-        cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
-        
-        // Leave cells empty if there's no data yet
-        if (nodeCount > 0)
-        {
-            // Set up the cell representing the app
-            AppRecord *appRecord = (self.entries)[indexPath.row];
-            
-            cell.titleLabel.text= appRecord.title;
-            cell.authorLabel.text = appRecord.author;
-
-            //NSLog(@"author : %@", appRecord.author);
-            
-            [cell.imageView.layer setBorderColor: [[UIColor grayColor] CGColor]];
-            [cell.imageView.layer setBorderWidth: 2.0];
-            
-            // Only load cached images; defer new downloads until scrolling ends
-            if (!appRecord.appIcon)
-            {
-                if (self.tableView.dragging == NO && self.tableView.decelerating == NO)
-                {
-                    [self startIconDownload:appRecord forIndexPath:indexPath];
-                }
-                // if a download is deferred or in progress, return a placeholder image
-                cell.imageView.image = [UIImage imageNamed:@"Placeholder.png"];
-            }
-            else
-            {
-                cell.imageView.image = appRecord.appIcon;
-            }
-        }
-    }
+    NSLog(@"appRecord title : %@", appRecord.title);
+    NSLog(@"indexPath row : %ld", indexPath.row);
+    
+    [cell.imageView.layer setBorderColor: [[UIColor grayColor] CGColor]];
+    [cell.imageView.layer setBorderWidth: 2.0];
+    
+    cell.titleLabel.text= appRecord.title;
+    cell.authorLabel.text = appRecord.author;
+    cell.imageView.image = [UIImage imageWithContentsOfFile:appRecord.localImageURL];
     
     return cell;
 }
@@ -138,7 +200,7 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.row % 2)
     {
-        [cell setBackgroundColor:[UIColor colorWithRed:.97 green:.97 blue:.97 alpha:1]];
+        [cell setBackgroundColor:[UIColor colorWithRed:.99 green:.99 blue:.99 alpha:1]];
     }
     else [cell setBackgroundColor:[UIColor whiteColor]];
 }
@@ -149,96 +211,52 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if ([[segue identifier] isEqualToString:@"showDetail"])
+  /*  if ([[segue identifier] isEqualToString:@"showDetail"])
     {
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        AppRecord *appRecord = (self.entries)[indexPath.row];
+        AppRecord *appRecord = (entries)[indexPath.row];
         
         NSLog(@"appRecord.title : %@",appRecord.title);
         
         //NSDate *object = self.objects[indexPath.row];
-        DetailViewController *controller =
-        (DetailViewController *)[segue destinationViewController];
+        BookCoverViewController *controller =
+        (BookCoverViewController *)[segue destinationViewController];
+        
+        [controller setAppRecord:appRecord];
+    }*/
+    
+    if([segue isKindOfClass:[CustomSegue class]])
+    {
+        ((CustomSegue *)segue).originatingPoint = self.view.center;
+        
+        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+        AppRecord *appRecord = (entries)[indexPath.row];
+        
+        NSLog(@"appRecord.title : %@",appRecord.title);
+        
+        //NSDate *object = self.objects[indexPath.row];
+        BookCoverViewController *controller =
+        (BookCoverViewController *)[segue destinationViewController];
         
         [controller setAppRecord:appRecord];
     }
 }
 
 
-#pragma mark - Table cell image support
-
-// -------------------------------------------------------------------------------
-//	startIconDownload:forIndexPath:
-// -------------------------------------------------------------------------------
-- (void)startIconDownload:(AppRecord *)appRecord forIndexPath:(NSIndexPath *)indexPath
-{
-    IconDownloader *iconDownloader = (self.imageDownloadsInProgress)[indexPath];
-    if (iconDownloader == nil)
-    {
-        iconDownloader = [[IconDownloader alloc] init];
-        iconDownloader.appRecord = appRecord;
-        [iconDownloader setCompletionHandler:^{
-            
-            UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
-            
-            // Display the newly loaded image
-            cell.imageView.image = appRecord.appIcon;
-            
-            // Remove the IconDownloader from the in progress list.
-            // This will result in it being deallocated.
-            [self.imageDownloadsInProgress removeObjectForKey:indexPath];
-            
-        }];
-        (self.imageDownloadsInProgress)[indexPath] = iconDownloader;
-        [iconDownloader startDownload];
-    }
+// This is the IBAction method referenced in the Storyboard Exit for the Unwind segue.
+// It needs to be here to create a link for the unwind segue.
+// But we'll do nothing with it.
+- (IBAction)unwindFromViewController:(UIStoryboardSegue *)sender {
 }
 
-// -------------------------------------------------------------------------------
-//	loadImagesForOnscreenRows
-//  This method is used in case the user scrolled into a set of cells that don't
-//  have their app icons yet.
-// -------------------------------------------------------------------------------
-- (void)loadImagesForOnscreenRows
-{
-    if (self.entries.count > 0)
-    {
-        NSArray *visiblePaths = [self.tableView indexPathsForVisibleRows];
-        for (NSIndexPath *indexPath in visiblePaths)
-        {
-            AppRecord *appRecord = (self.entries)[indexPath.row];
-            
-            if (!appRecord.appIcon)
-                // Avoid the app icon download if the app already has an icon
-            {
-                [self startIconDownload:appRecord forIndexPath:indexPath];
-            }
-        }
-    }
-}
-
-
-#pragma mark - UIScrollViewDelegate
-
-// -------------------------------------------------------------------------------
-//	scrollViewDidEndDragging:willDecelerate:
-//  Load images for all onscreen rows when scrolling is finished.
-// -------------------------------------------------------------------------------
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
-{
-    if (!decelerate)
-    {
-        [self loadImagesForOnscreenRows];
-    }
-}
-
-// -------------------------------------------------------------------------------
-//	scrollViewDidEndDecelerating:scrollView
-//  When scrolling stops, proceed to load the app icons that are on screen.
-// -------------------------------------------------------------------------------
-- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
-{
-    [self loadImagesForOnscreenRows];
+// We need to over-ride this method from UIViewController to provide a custom segue for unwinding
+- (UIStoryboardSegue *)segueForUnwindingToViewController:(UIViewController *)toViewController fromViewController:(UIViewController *)fromViewController identifier:(NSString *)identifier {
+    // Instantiate a new CustomUnwindSegue
+    CustomUnwindSegue *segue = [[CustomUnwindSegue alloc] initWithIdentifier:identifier source:fromViewController destination:toViewController];
+    // Set the target point for the animation to the center of the button in this VC
+    segue.targetPoint = self.view.center;
+    
+    return segue;
 }
 
 @end

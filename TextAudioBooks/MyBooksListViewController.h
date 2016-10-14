@@ -22,6 +22,6 @@
 @interface MyBooksListViewController : UITableViewController
 
 // the main data model for our UITableView
-@property (nonatomic, strong) NSArray *entries;
+//@property (nonatomic, strong) NSArray *entries;
 
 @end

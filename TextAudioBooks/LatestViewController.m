@@ -24,7 +24,7 @@
 #import "IconDownloader.h"
 #import "ParseOperation.h"
 
-#define kCustomRowCount 7
+#define kCustomRowCount 1
 
 static NSString *CellIdentifier = @"LazyTableCell";
 static NSString *PlaceholderCellIdentifier = @"PlaceholderCell";
@@ -246,6 +246,11 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
     {
         // add a placeholder cell while waiting on table data
         cell = [tableView dequeueReusableCellWithIdentifier:PlaceholderCellIdentifier forIndexPath:indexPath];
+        
+        cell.titleLabel.text = @"";
+        cell.authorLabel.text = @"";
+        
+        return cell;
     }
     else
     {
@@ -288,11 +293,10 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.row % 2)
     {
-        [cell setBackgroundColor:[UIColor colorWithRed:.97 green:.97 blue:.97 alpha:1]];
+        [cell setBackgroundColor:[UIColor colorWithRed:.99 green:.99 blue:.99 alpha:1]];
     }
     else [cell setBackgroundColor:[UIColor whiteColor]];
 }
-
 
 
 #pragma mark - Segues
