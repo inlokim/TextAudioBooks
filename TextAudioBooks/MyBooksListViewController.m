@@ -32,7 +32,7 @@
 
 @interface MyBooksListViewController ()
 {
-    NSArray *entries;
+    NSMutableArray *entries;
     AppRecord *aBook;
 }
 
@@ -61,7 +61,27 @@ static NSString *CellIdentifier = @"MyBooksCell";
     
     [self.tableView reloadData];
 
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(didChangeTableData:)
+                                                 name:@"changeTableData" object:nil];
 }
+
+- (void)didChangeTableData:(NSNotification *)notification
+{
+    NSLog(@"didChangeTableData");
+    [self viewDidLoad];
+    [self viewWillAppear:YES];
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:@"changeTableData"
+                                                  object:nil];
+}
+
+
 // -------------------------------------------------------------------------------
 //	didReceiveMemoryWarning
 // -------------------------------------------------------------------------------
@@ -101,7 +121,7 @@ static NSString *CellIdentifier = @"MyBooksCell";
     if ([[NSFileManager defaultManager] fileExistsAtPath:filePath])
     {
         NSArray *array = [[NSArray alloc] initWithContentsOfFile:filePath];
-        NSLog(@"array count = %ld",[array count]);
+        NSLog(@"array count = %d",(int)[array count]);
         
         
         // for (int i=0; i < [array count] ; i ++)
@@ -119,7 +139,7 @@ static NSString *CellIdentifier = @"MyBooksCell";
             NSLog(@"chunks3 : %@ ",[chunks objectAtIndex:3]);
             //NSLog(@"chunks4 : %@ ",[chunks objectAtIndex:4]);
             
-            NSLog(@"chunks count : %ld", chunks.count);
+            NSLog(@"chunks count : %d", (int)chunks.count);
             
             if (chunks.count > 1)
             {
@@ -185,10 +205,10 @@ static NSString *CellIdentifier = @"MyBooksCell";
     AppRecord * appRecord = [entries objectAtIndex:indexPath.row];
     
     NSLog(@"appRecord title : %@", appRecord.title);
-    NSLog(@"indexPath row : %ld", indexPath.row);
+    NSLog(@"indexPath row : %d", (int)indexPath.row);
     
-    [cell.imageView.layer setBorderColor: [[UIColor grayColor] CGColor]];
-    [cell.imageView.layer setBorderWidth: 2.0];
+    [cell.imageView.layer setBorderColor: [[UIColor lightGrayColor] CGColor]];
+    [cell.imageView.layer setBorderWidth: 1.0];
     
     cell.titleLabel.text= appRecord.title;
     cell.authorLabel.text = appRecord.author;
@@ -205,6 +225,79 @@ static NSString *CellIdentifier = @"MyBooksCell";
     else [cell setBackgroundColor:[UIColor whiteColor]];
 }
 
+// Override to support conditional editing of the table view.
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    // Return NO if you do not want the specified item to be editable.
+    
+    return YES;
+}
+
+// Override to support editing the table view.
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    
+    NSString *filePath =
+    [[Utils homeDir] stringByAppendingPathComponent:MYBOOKS_PLIST];
+    
+    NSMutableArray *array = [[NSMutableArray alloc] initWithContentsOfFile:filePath];
+
+    AppRecord * appRecord = [entries objectAtIndex:indexPath.row];
+    
+    if (editingStyle == UITableViewCellEditingStyleDelete)
+    {
+        /*********************************
+         My Books - MyBooks.plist 수정
+         **********************************/
+
+        NSLog(@"array count = %d",(int)[array count]);
+        
+        for (int i=0; i < [array count] ; i ++)
+        {
+            NSString *string = [array objectAtIndex:i];
+            NSArray *chunks = [string componentsSeparatedByString: @":"];
+            
+
+            NSString *myBookId = [chunks objectAtIndex:0];
+            
+            if ([myBookId isEqual:appRecord.bookId]){
+                [array removeObjectAtIndex:i];
+            }
+        }
+        
+        [array writeToFile:filePath atomically:YES];
+        
+        /*********************************
+         My Books - 관련 파일 삭제
+         **********************************/
+        //BookType sample=1, buy=2
+        NSString *flag = [[NSString alloc] init];
+        if ([appRecord.bookType isEqualToString:@"1"]) flag = @"_preview";
+        else if ([appRecord.bookType isEqualToString:@"2"]) flag = @"_full";
+        
+        NSLog(@"Delete Files");
+        
+        NSString *fileName = [Utils fileDir:appRecord.bookType bookId:appRecord.bookId];
+        
+        NSString *file = [NSString stringWithFormat:@"%@/%@", [Utils homeDir], fileName];
+        
+        NSString *imageFile = [NSString stringWithFormat:@"%@/%@_cover.png", [Utils homeDir], fileName];
+       // NSString *plistFile = [NSString stringWithFormat:@"%@/%@.plist", [Utils homeDir], fileName];
+        NSLog(@"fileName : %@", fileName);
+        
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        [fileManager removeItemAtPath:file error:NULL];
+        [fileManager removeItemAtPath:imageFile error:NULL];
+       // [fileManager removeItemAtPath:plistFile error:NULL];
+        
+        // Delete the row from the data source.
+        [entries removeObjectAtIndex:indexPath.row];
+        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    }
+    // else if (editingStyle == UITableViewCellEditingStyleInsert) {
+    // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
+    // }
+}
 
 
 #pragma mark - Segues

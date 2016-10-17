@@ -129,15 +129,13 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
                         
                         //LatestViewController *rootViewController =
                         //(LatestViewController*)[(UINavigationController*)weakSelf.window.rootViewController topViewController];
- 
-                        
-                        self.entries = weakParser.appRecordList;
+                        //__weak typeof(self) weakSelf = self;
+                        weakSelf.entries = weakParser.appRecordList;
  
                         // tell our table view to reload its data, now that parsing has completed
-                        [self.tableView reloadData];
+                        [weakSelf.tableView reloadData];
                     });
                 }
- 
                 // we are finished with the queue and our ParseOperation
                 weakSelf.queue = nil;
             };
@@ -267,8 +265,8 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
 
             //NSLog(@"author : %@", appRecord.author);
             
-            [cell.imageView.layer setBorderColor: [[UIColor grayColor] CGColor]];
-            [cell.imageView.layer setBorderWidth: 2.0];
+            [cell.imageView.layer setBorderColor: [[UIColor lightGrayColor] CGColor]];
+            [cell.imageView.layer setBorderWidth: 1.0];
             
             // Only load cached images; defer new downloads until scrolling ends
             if (!appRecord.appIcon)
@@ -363,7 +361,7 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
             AppRecord *appRecord = (self.entries)[indexPath.row];
             
             if (!appRecord.appIcon)
-                // Avoid the app icon download if the app already has an icon
+            // Avoid the app icon download if the app already has an icon
             {
                 [self startIconDownload:appRecord forIndexPath:indexPath];
             }

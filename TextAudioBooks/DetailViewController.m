@@ -80,7 +80,7 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     contentLabel.text = appRecord.content;
     
     [imageView.layer setBorderColor: [[UIColor grayColor] CGColor]];
-    [imageView.layer setBorderWidth: 2.0];
+    [imageView.layer setBorderWidth: 1.0];
     imageView.image = appRecord.appIcon;
     
     //Download
@@ -101,7 +101,59 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     self.session = [NSURLSession sessionWithConfiguration:sessionConfiguration
                                                  delegate:self
                                             delegateQueue:nil];
+    
+    
+    //Menu visible / hidden
+    
+    
 }
+
+
+-(void) viewWillAppear:(BOOL)animated
+{
+    //-------------------
+    // 버튼 SHOW/HIDE
+    //-------------------
+    [self buttonShowHide];
+}
+
+-(void) buttonShowHide
+{
+    //-------------------
+    // 버튼 SHOW/HIDE
+    //-------------------
+    
+    // myBooks.plist로부터 데이터를 가져온다.
+    NSString *filePath =
+    [[Utils homeDir] stringByAppendingPathComponent:MYBOOKS_PLIST];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath])
+    {
+        NSArray *array = [[NSArray alloc] initWithContentsOfFile:filePath];
+
+        for (int i=0; i < [array count] ; i ++)
+        {
+            NSString *string = [array objectAtIndex:i];
+            NSArray *chunks = [string componentsSeparatedByString: @":"];
+            
+            NSString *myBookId = [chunks objectAtIndex:0];
+            NSLog(@"myBookId=%@ appRecord.bookId=%@",myBookId, appRecord.bookId);
+            
+            NSString *flag = [chunks objectAtIndex:3];
+            //My Books에 같은 책이 존재한다면 버튼을 Hide
+            if ([myBookId isEqual:appRecord.bookId])
+            {
+                if ([flag isEqual:@"1"]) sampleButton.hidden = YES;
+                else if ([flag isEqual:@"2"])
+                {
+                    sampleButton.hidden = YES;
+                    purchaseButton.hidden = YES;
+                }
+            }
+        }
+    }
+}
+
 
 -(void)viewDidLayoutSubviews
 {
@@ -132,8 +184,6 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 - (IBAction)getSampleButtonPressed:(id)sender {
     
     downloadType = SAMPLE;
-    [self savePersistence];
-    [self saveSmallCoverImage];
     [self startDownload];
 }
 
@@ -152,7 +202,7 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     else
         array = [[NSMutableArray alloc] init];
     
-    NSLog(@"array count = %d",[array count]);
+    NSLog(@"array count = %d",(int)[array count]);
     
     //myBooks.plist안에 샘플 정보가 있다면 삭제한다.
     for (int i=0; i < [array count] ; i ++)
@@ -314,15 +364,34 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 }
 
 
--(void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error{
-    if (error != nil) {
+-(void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error
+{
+    if (error != nil)
+    {
         NSLog(@"Download completed with error: %@", [error localizedDescription]);
     }
-    else{
+    else
+    {
+       /* UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Hello!"
+                                                        message:@"Hello!" delegate:self
+                                              cancelButtonTitle:@"Done"
+                                              otherButtonTitles:nil];
+        [alert performSelectorOnMainThread:@selector(show)
+                                withObject:nil
+                             waitUntilDone:NO];*/
         [self unZipping];
         [self deleteFile];
+        [self savePersistence];
+        [self saveSmallCoverImage];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"changeTableData"
+                                                            object:self];
+        
         NSLog(@"Download finished successfully.");
         
+        [self.tabBarController setSelectedIndex:0];
+        
+       // [alert dismissWithClickedButtonIndex:0 animated:YES];
         
         dispatch_async(dispatch_get_main_queue(), ^{
             [self viewDidLoad];
@@ -332,7 +401,6 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
         //[self.view setNeedsDisplay];
     }
 }
-
 
 - (void)unZipping {
     
@@ -407,7 +475,8 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     // Check if all download tasks have been finished.
     [self.session getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
         
-        if ([downloadTasks count] == 0) {
+        if ([downloadTasks count] == 0)
+        {
             if (appDelegate.backgroundTransferCompletionHandler != nil) {
                 // Copy locally the completion handler.
                 void(^completionHandler)() = appDelegate.backgroundTransferCompletionHandler;

@@ -184,9 +184,13 @@
                                 <action selector="playSound:" destination="Mg6-aO-Upz" id="I7n-bx-Xl4"/>
                             </connections>
                         </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="oPr-j1-bFS"/>
+                        <barButtonItem title="Prev" id="F8J-xt-HbI"/>
+                        <barButtonItem title="Next" id="ROj-jg-KGF"/>
                     </toolbarItems>
                     <navigationItem key="navigationItem" id="xOL-vm-DIT">
                         <barButtonItem key="leftBarButtonItem" id="RGG-ws-eEz"/>
+                        <barButtonItem key="rightBarButtonItem" title="Setting" id="LHC-Z9-2cB"/>
                     </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
