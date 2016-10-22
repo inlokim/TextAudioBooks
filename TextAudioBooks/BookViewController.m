@@ -11,11 +11,12 @@
 #import "BookTableViewCell.h"
 #import "Utils.h"
 
+#define MYBOOKS_PLIST  @"myBooks.plist"
+
+
 @interface BookViewController ()
 {
     BOOL xmlExists;
-    NSUInteger indexRow;
-
     
     //XML
     NSXMLParser *xmlParser;
@@ -41,8 +42,11 @@
     
     BOOL					firstTime;
     
+    //NSString *fileId;
+    
     IBOutlet UIBarButtonItem * playButton;
-   
+    IBOutlet UIBarButtonItem * prevButton;
+    IBOutlet UIBarButtonItem * nextButton;
 }
 
 @end
@@ -50,77 +54,63 @@
 @implementation BookViewController
 
 @synthesize appRecord;
-@synthesize fileId;
+//@synthesize fileId;
+@synthesize contentsIndex;
+@synthesize contentsArray;
 
 static NSString *cellIdentifier = @"MyCell";
 
-void RouteChangeListener(void *                  inClientData,
+/*void RouteChangeListener(void *                  inClientData,
                          AudioSessionPropertyID	 inID,
                          UInt32                  inDataSize,
-                         const void *            inData);
+                         const void *            inData);*/
 
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
     
-    self.title = appRecord.title;
+    
+     self.automaticallyAdjustsScrollViewInsets = NO;
+    
+    [self.navigationController setNavigationBarHidden:NO animated:NO];
+    [self.navigationController setToolbarHidden:NO animated:NO];
+    
+    self.title = [[contentsArray objectAtIndex:contentsIndex.row] objectForKey:@"title"];
     
     firstTime = TRUE;
-    currentRow = 0;
-
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didChangePreferredContentSize:)
                                                  name:UIContentSizeCategoryDidChangeNotification object:nil];
-    
+    //가변적인 테이블 높이를 위해 기본 값 설정
     self.tableView.estimatedRowHeight = 200.0;
     self.tableView.rowHeight = UITableViewAutomaticDimension;
-    
-  //  [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:CellIdentifier];
-
     
     [self XMLSetup];
     [self loadAudio];
     
-    /******
-     AUDIO
-     ******/
- /*   OSStatus result = AudioSessionInitialize(NULL, NULL, NULL, NULL);
-    if (result)
-        NSLog(@"Error initializing audio session! %ld", result);
+
+    //Terminate
     
-    [[AVAudioSession sharedInstance] setDelegate: self];
-    NSError *setCategoryError = nil;
-    [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayback error: &setCategoryError];
-    if (setCategoryError)
-        NSLog(@"Error setting category! %@", setCategoryError);
+    UIApplication *app = [UIApplication sharedApplication];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationWillTerminate:)
+                                                 name:UIApplicationWillTerminateNotification
+                                               object:app];
+    //Buttons
     
-    result = AudioSessionAddPropertyListener (kAudioSessionProperty_AudioRouteChange, RouteChangeListener, (__bridge void *)(self));
-    if (result)
-        NSLog(@"Could not add property listener! %ld", result);
+    //Contents index
+    if (contentsIndex.row > 0) prevButton.enabled = YES;
+    else prevButton.enabled = NO;
     
-    
-  */
-    /******
-     ROW
-     ******/
-    theIndexPath = [NSIndexPath indexPathForRow:currentRow inSection:0];
-    
-/*    //첫 로우
-    if (currentRow == 0)
-    {
-        [self selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionTop];
-    }
-    //마지막 로우
-    else if (scripts.count == currentRow)
-    {
-        NSLog(@"lastRow");
-        [tableView selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionBottom];
-    }
-    else
-    {
-        [tableView selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionMiddle];
-    }
-    */
+    if (contentsIndex.row < contentsArray.count - 1) nextButton.enabled = YES;
+    else nextButton.enabled = NO;
+        
+}
+
+- (void)viewWillLayoutSubviews {
+    self.tableView.contentInset = UIEdgeInsetsMake(self.topLayoutGuide.length, 0, 0, 0);
 }
 
 - (void)didChangePreferredContentSize:(NSNotification *)notification
@@ -136,17 +126,14 @@ void RouteChangeListener(void *                  inClientData,
 }
 
 
-
 #pragma mark - ViewDisplay
 
 
 - (void)XMLSetup
 {
     xmlExists = false;
-    
-    NSString *fileName = [Utils fileDir:appRecord.bookType bookId:appRecord.bookId];
-    NSString *path =
-    [NSString stringWithFormat:@"%@/%@/audios/%@.xml", [Utils homeDir], fileName, fileId];
+
+    NSString *path = [self getAudioPath:@"xml"];
     
     if ([[NSFileManager defaultManager] fileExistsAtPath:path])
     {
@@ -157,6 +144,25 @@ void RouteChangeListener(void *                  inClientData,
     }
 }
 
+- (NSString *)getAudioPath : (NSString *) type
+{
+    //type : xml, mp3
+    NSString *fileName = [Utils fileDir:appRecord.bookType bookId:appRecord.bookId];
+    NSString *fileId = [[contentsArray objectAtIndex:contentsIndex.row] objectForKey:@"key"];
+    NSString *path =
+    [NSString stringWithFormat:@"%@/%@/audios/%@.%@", [Utils homeDir], fileName, fileId, type];
+    
+    return path;
+}
+
+-(void)titleBarPressed
+{
+    NSLog(@"titlePressed");
+    if (!player.playing) {
+        NSIndexPath *myIndexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+        [self.tableView scrollToRowAtIndexPath:myIndexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
+    }	
+}
 
 #pragma mark - NSXMLParser
 
@@ -241,22 +247,31 @@ void RouteChangeListener(void *                  inClientData,
     
     BookTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
     
-    [self configureCell:cell forRowAtIndexPath:indexPath];
+    if ([cell isKindOfClass:[BookTableViewCell class]])
+    {
+        //BookTableViewCell *textCell = (BookTableViewCell *)cell;
+        cell.textLabel.text
+        = [[arrNeighboursData objectAtIndex:indexPath.row] objectForKey:@"Description"];
+        cell.textLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+        
+ /*
+        UIView *backgroundView = [[UIView alloc]initWithFrame:self.tableView.bounds];
+        backgroundView.layer.backgroundColor = [[UIColor colorWithRed:0.529 green:0.808 blue:0.822 alpha:0.5]CGColor];
+        
+        //backgroundView.layer.borderWidth = 0.0f;
+        if (indexPath.row == currentRow)
+        {
+            NSLog(@"#indexPath.row : %d, #currentRow : %d", indexPath.row, currentRow);
+            cell.backgroundView = backgroundView;
+        }
+
+        
+        // [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"LightYellow.png"]] autorelease];*/
+    }
     
     return cell;
 }
 
-
-- (void)configureCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if ([cell isKindOfClass:[BookTableViewCell class]])
-    {
-        BookTableViewCell *textCell = (BookTableViewCell *)cell;
-        textCell.textLabel.text
-        = [[arrNeighboursData objectAtIndex:indexPath.row] objectForKey:@"Description"];
-        textCell.textLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-    }
-}
 
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -275,13 +290,8 @@ void RouteChangeListener(void *                  inClientData,
 
 - (void) loadAudio
 {
-    
-    NSString *fileName = [Utils fileDir:appRecord.bookType bookId:appRecord.bookId];
-    NSString *path =
-    [NSString stringWithFormat:@"%@/%@/audios/%@.mp3", [Utils homeDir], fileName, fileId];
-    
+    NSString *path = [self getAudioPath:@"mp3"];
     player = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL fileURLWithPath:path] error:nil];
-    
 }
 
 /******************************************
@@ -294,12 +304,12 @@ void RouteChangeListener(void *                  inClientData,
     //마지막 로우
     if (currentRow == (arrNeighboursData.count-1))
     {
-        NSLog(@"last Row");
+        //NSLog(@"last Row");
         if (!player.playing){
             [updateTimer invalidate];
             updateTimer = nil;
 
-           // [playButton setImage:playBtnBG forState:UIControlStateNormal];
+            [playButton setTitle:@"Play"];
             //firstTime true로 해주면 마지막 로우에서 버튼 클릭해도 문제 안생김
             firstTime = TRUE;
             
@@ -309,24 +319,23 @@ void RouteChangeListener(void *                  inClientData,
         //spleep모드로 빠지는 것을 허가한다.
         [UIApplication sharedApplication].idleTimerDisabled = NO;
     }
-    else {
-        NSString *startTime = [[arrNeighboursData objectAtIndex:currentRow + 1] objectForKey:@"StartTime"];
+    else
+    {
+        NSString *startTime = [[arrNeighboursData objectAtIndex:currentRow+1] objectForKey:@"StartTime"];
         float thisEndTime = [startTime floatValue] / 1000;
-        
         
         if (endTime > thisEndTime)
         {
-           
             theIndexPath = [NSIndexPath indexPathForRow:currentRow+1 inSection:0];
 
-            //Cell Highlighted
-            
-            UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:theIndexPath];
+            //Cell 
+            BookTableViewCell *cell =
+            [self.tableView cellForRowAtIndexPath:theIndexPath];
             cellHeight = (NSUInteger)cell.contentView.frame.size.height;
             
             if ( cellHeight > 300 )
             {
-                //NSLog(@"Cell height: %f", cell.contentView.frame.size.height);
+                NSLog(@"Cell height: %f", cell.contentView.frame.size.height);
                 [self.tableView selectRowAtIndexPath:theIndexPath animated:YES
                                  scrollPosition:UITableViewScrollPositionTop];
             }
@@ -341,6 +350,107 @@ void RouteChangeListener(void *                  inClientData,
             
         }
     }
+}
+
+#pragma mark - Persistence
+
+/******************************
+ GET Persitence Data
+ ******************************/
+
+- (void) getPersistData
+{
+    NSString *fileName = [appRecord.bookId stringByAppendingString:@".plist"];
+    NSString *filePath =
+    [[Utils homeDir] stringByAppendingPathComponent:fileName];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath])
+    {
+        NSArray *array = [[NSArray alloc] initWithContentsOfFile:filePath];
+        NSLog(@"array count = %d",[array count]);
+        
+        for (int i=0; i < [array count] ; i ++)
+        {
+            NSString *string = [array objectAtIndex:i];
+            NSArray *chunks = [string componentsSeparatedByString: @":"];
+            
+            NSString *listIndexRow = [chunks objectAtIndex:0];
+            NSString *detailIndexRow = [chunks objectAtIndex:1];
+            
+            if ([listIndexRow isEqualToString:[NSString stringWithFormat:@"%d",contentsIndex.row]])
+            {
+                currentRow = [detailIndexRow intValue];
+                break;
+            }
+        }
+    }
+}
+
+- (void) savePersistData
+{
+    /*********************************
+     SAVE Persistence Data
+     **********************************/
+    NSString *fileName = [appRecord.bookId stringByAppendingString:@".plist"];
+    NSString *filePath =
+    [[Utils homeDir] stringByAppendingPathComponent:fileName];
+    
+    NSMutableArray *array = nil;
+    
+    //bookId.plist로부터 데이터를 가져온다.
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath])
+    {
+        array = [[NSMutableArray alloc] initWithContentsOfFile:filePath];
+    }
+    else
+    {
+        array = [[NSMutableArray alloc] init];
+    }
+    NSLog(@"array count = %d",[array count]);
+    
+    //bookId.plist안에 같은 인덱스 로우 정보가 있다면 삭제한다.
+    for (int i=0; i < [array count] ; i ++)
+    {
+        NSString *string = [array objectAtIndex:i];
+        NSArray *chunks = [string componentsSeparatedByString: @":"];
+        
+        NSString *listIndexRow = [chunks objectAtIndex:0];
+        // NSString *detailIndexRow = [chunks objectAtIndex:1];
+        
+        //       NSLog(@"listIndexRow=%@",listIndexRow);
+        //        NSLog(@"detailIndexRow=%@",detailIndexRow);
+        
+        if ([listIndexRow isEqualToString:[NSString stringWithFormat:@"%d",contentsIndex.row]])
+        {
+            [array removeObjectAtIndex:i];
+        }
+    }
+    NSLog(@"indexRow : %d, currentRow : %d ",contentsIndex.row,currentRow);
+    [array addObject:[NSString stringWithFormat:@"%d:%d",contentsIndex.row, currentRow]];
+    [array writeToFile:filePath atomically:YES];
+}
+
+//Buttons
+
+- (IBAction)prevButton:(id)sender
+{
+    NSLog(@"prevButton");
+    [self buttonHandler:contentsIndex.row-1];
+}
+
+- (IBAction)nextButton:(id)sender
+{
+    NSLog(@"nextButton");
+    [self buttonHandler:contentsIndex.row+1];
+}
+
+- (void)buttonHandler : (NSUInteger)indexRow
+{
+    [self stopPlayer];
+    [playButton setTitle:@"Play"];
+    contentsIndex = [NSIndexPath indexPathForRow:indexRow inSection:0];
+    [self viewDidLoad];
+    [self viewWillAppear:YES];
 }
 
 /******************************************
@@ -367,11 +477,13 @@ void RouteChangeListener(void *                  inClientData,
             NSString *startTime = [[arrNeighboursData objectAtIndex:currentRow] objectForKey:@"StartTime"];
 
             player.currentTime = [startTime floatValue] / 1000;
-            /*if (currentRow == 0) {
+            
+            if (currentRow == 0) {
              
              NSLog(@"currentRow == 0");
-             [tableView selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionTop];
-             }*/
+             [self.tableView selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionTop];
+             }
+            
             theIndexPath = [NSIndexPath indexPathForRow:currentRow inSection:0];
             firstTime = FALSE;
         }
@@ -417,7 +529,7 @@ void RouteChangeListener(void *                  inClientData,
     //spleep모드로 빠지는 것을 허가한다.
     [UIApplication sharedApplication].idleTimerDisabled = NO;
     
-   // [self savePersistData];
+    [self savePersistData];
 }
 
 /**************
@@ -437,9 +549,9 @@ void RouteChangeListener(void *                  inClientData,
     [UIApplication sharedApplication].idleTimerDisabled = NO;
     
     
-  //  [self savePersistData];
+    [self savePersistData];
 }
-
+/*
 void RouteChangeListener(void *                  inClientData,
                          AudioSessionPropertyID	 inID,
                          UInt32                  inDataSize,
@@ -460,7 +572,7 @@ void RouteChangeListener(void *                  inClientData,
         }
     }
 }
-
+*/
 
 #pragma mark AVAudioPlayer delegate methods
 
@@ -499,12 +611,60 @@ void RouteChangeListener(void *                  inClientData,
     [super viewWillAppear:animated];
     
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
+    
+    
+    [self getPersistData];
+    
+    NSLog(@"currentRow : %d", currentRow);
+    
+    /******
+     ROW
+     ******/
+    theIndexPath = [NSIndexPath indexPathForRow:currentRow inSection:0];
+    [self.tableView reloadData];
+    //첫 로우
+/*    if (currentRow == 0)
+    {
+        NSLog(@"UITableViewScrollPositionTop");
+        [self.tableView selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionTop];
+    }*/
+    //마지막 로우
+    if ([arrNeighboursData count] == currentRow)
+    {
+        NSLog(@"UITableViewScrollPositionBottom");
+        [self.tableView selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionBottom];
+    }
+    else
+    {
+        //NSLog(@"UITableViewScrollPositionMiddle");
+        NSLog(@"theIndexPath.row : %d", theIndexPath.row);
+        
+        [self.tableView selectRowAtIndexPath:theIndexPath animated:YES scrollPosition:UITableViewScrollPositionTop];
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
     [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    
+    
+    NSLog(@"viewWillDisappear");
+    
+    [self savePersistData];
+
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+
+}
+
+- (void)applicationWillTerminate:(NSNotification *)notification
+{
+    NSLog(@"terminate");
+    [self savePersistData];
 }
 
 

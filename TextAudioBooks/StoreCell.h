@@ -13,5 +13,7 @@ Custom collection view cell for image and its label.
 @property (strong, nonatomic) IBOutlet UIImageView *imageView;
 @property (strong, nonatomic) IBOutlet UILabel *titleLabel;
 @property (strong, nonatomic) IBOutlet UILabel *authorLabel;
+@property (strong, nonatomic) IBOutlet UIImageView *sampleView;
+
 
 @end

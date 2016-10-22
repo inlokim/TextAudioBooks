@@ -36,6 +36,8 @@
     AppRecord *aBook;
 }
 
+@property (nonatomic, strong) NSMutableArray *products;
+
 @end
 
 
@@ -60,11 +62,16 @@ static NSString *CellIdentifier = @"MyBooksCell";
     NSLog(@"entries count : %d", (int)entries.count);
     
     [self.tableView reloadData];
-
     
+    //after auto tab bar changed
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didChangeTableData:)
                                                  name:@"changeTableData" object:nil];
+    
+    
+    //price
+    self.products = [[NSMutableArray alloc] initWithCapacity:0];
+    
 }
 
 - (void)didChangeTableData:(NSNotification *)notification
@@ -204,8 +211,8 @@ static NSString *CellIdentifier = @"MyBooksCell";
     // Set up the cell representing the app
     AppRecord * appRecord = [entries objectAtIndex:indexPath.row];
     
-    NSLog(@"appRecord title : %@", appRecord.title);
-    NSLog(@"indexPath row : %d", (int)indexPath.row);
+   // NSLog(@"appRecord title : %@", appRecord.title);
+   // NSLog(@"indexPath row : %d", (int)indexPath.row);
     
     [cell.imageView.layer setBorderColor: [[UIColor lightGrayColor] CGColor]];
     [cell.imageView.layer setBorderWidth: 1.0];
@@ -213,6 +220,15 @@ static NSString *CellIdentifier = @"MyBooksCell";
     cell.titleLabel.text= appRecord.title;
     cell.authorLabel.text = appRecord.author;
     cell.imageView.image = [UIImage imageWithContentsOfFile:appRecord.localImageURL];
+    
+    if ([appRecord.bookType isEqualToString:@"1"])//sample=1
+    {
+        [cell.sampleView setHidden:NO];
+    }
+    else //full
+    {
+        [cell.sampleView setHidden:YES];
+    }
     
     return cell;
 }
@@ -224,6 +240,14 @@ static NSString *CellIdentifier = @"MyBooksCell";
     }
     else [cell setBackgroundColor:[UIColor whiteColor]];
 }
+
+/*
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    StoreCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+    centerPoint = cell.center;
+}
+*/
 
 // Override to support conditional editing of the table view.
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -281,7 +305,7 @@ static NSString *CellIdentifier = @"MyBooksCell";
         
         NSString *file = [NSString stringWithFormat:@"%@/%@", [Utils homeDir], fileName];
         
-        NSString *imageFile = [NSString stringWithFormat:@"%@/%@_cover.png", [Utils homeDir], fileName];
+        NSString *imageFile = [NSString stringWithFormat:@"%@/%@_cover.png", [Utils homeDir], appRecord.bookId];
        // NSString *plistFile = [NSString stringWithFormat:@"%@/%@.plist", [Utils homeDir], fileName];
         NSLog(@"fileName : %@", fileName);
         
@@ -304,9 +328,30 @@ static NSString *CellIdentifier = @"MyBooksCell";
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-  /*  if ([[segue identifier] isEqualToString:@"showDetail"])
+    if ([[segue identifier] isEqualToString:@"showDetail"])
     {
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+        AppRecord *appRecord = (entries)[indexPath.row];
+        
+        NSLog(@"appRecord.title : %@",appRecord.title);
+        
+        //NSDate *object = self.objects[indexPath.row];
+        BookCoverViewController *controller =
+        (BookCoverViewController *)[[segue destinationViewController] topViewController];
+        
+        [controller setAppRecord:appRecord];
+    }
+  /*
+    if([segue isKindOfClass:[CustomSegue class]])
+    {
+        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+        
+        CGPoint loc = CGPointMake(0,  indexPath.row * 85);
+        
+        ((CustomSegue *)segue).originatingPoint = loc;
+        
+        NSLog(@"%@", NSStringFromCGPoint(loc));
+
         AppRecord *appRecord = (entries)[indexPath.row];
         
         NSLog(@"appRecord.title : %@",appRecord.title);
@@ -317,29 +362,14 @@ static NSString *CellIdentifier = @"MyBooksCell";
         
         [controller setAppRecord:appRecord];
     }*/
-    
-    if([segue isKindOfClass:[CustomSegue class]])
-    {
-        ((CustomSegue *)segue).originatingPoint = self.view.center;
-        
-        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        AppRecord *appRecord = (entries)[indexPath.row];
-        
-        NSLog(@"appRecord.title : %@",appRecord.title);
-        
-        //NSDate *object = self.objects[indexPath.row];
-        BookCoverViewController *controller =
-        (BookCoverViewController *)[segue destinationViewController];
-        
-        [controller setAppRecord:appRecord];
-    }
 }
-
 
 // This is the IBAction method referenced in the Storyboard Exit for the Unwind segue.
 // It needs to be here to create a link for the unwind segue.
 // But we'll do nothing with it.
-- (IBAction)unwindFromViewController:(UIStoryboardSegue *)sender {
+- (IBAction)unwindFromViewController:(UIStoryboardSegue *)sender
+{
+    NSLog(@"unwindFromViewController");
 }
 
 // We need to over-ride this method from UIViewController to provide a custom segue for unwinding

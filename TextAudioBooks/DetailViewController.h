@@ -7,13 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <StoreKit/StoreKit.h>
 #import "AppRecord.h"
 
 @interface DetailViewController : UIViewController <NSURLSessionDelegate>
 
 
 @property (strong, nonatomic) AppRecord *appRecord;
-
+@property (strong, nonatomic) SKProduct *skProduct;
 
 @end
 

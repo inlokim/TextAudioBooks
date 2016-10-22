@@ -52,6 +52,9 @@ NSString * const IAPProductRequestNotification = @"IAPProductRequestNotification
 // Fetch information about your products from the App Store
 -(void)fetchProductInformationForIds:(NSArray *)productIds
 {
+    
+    NSLog(@"productsIds : %d", productIds.count);
+    
     self.productRequestResponse = [[NSMutableArray alloc] initWithCapacity:0];
     // Create a product request object and initialize it with our product identifiers
     SKProductsRequest *request = [[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithArray:productIds]];
@@ -68,6 +71,9 @@ NSString * const IAPProductRequestNotification = @"IAPProductRequestNotification
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response
 {
     MyModel *model = nil;
+    
+    
+    NSLog(@"response.products).count : %d", (response.products).count);
     
     // The products array contains products whose identifiers have been recognized by the App Store.
     // As such, they can be purchased. Create an "AVAILABLE PRODUCTS" model object.

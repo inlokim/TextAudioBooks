@@ -16,7 +16,9 @@
  Images are scaled to the desired height.
  If rapid scrolling is in progress, downloads do not begin until scrolling has ended.
  */
-
+#import "MyModel.h"
+#import "StoreManager.h"
+#import "StoreObserver.h"
 #import "LatestViewController.h"
 #import "DetailViewController.h"
 #import "StoreCell.h"
@@ -33,6 +35,10 @@ static NSString *PlaceholderCellIdentifier = @"PlaceholderCell";
 #pragma mark -
 
 @interface LatestViewController () <UIScrollViewDelegate>
+{
+    Boolean productsDownloadCompleted;
+    UIActivityIndicatorView *spinner;
+}
 
 // the set of IconDownloader objects for each app
 @property (nonatomic, strong) NSMutableDictionary *imageDownloadsInProgress;
@@ -40,6 +46,8 @@ static NSString *PlaceholderCellIdentifier = @"PlaceholderCell";
 @property (nonatomic, strong) NSOperationQueue *queue;
 // the NSOperation driving the parsing of the RSS feed
 @property (nonatomic, strong) ParseOperation *parser;
+
+@property (nonatomic, strong) NSMutableArray *products;
 
 @end
 
@@ -56,6 +64,8 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
 {
     [super viewDidLoad];
     
+    productsDownloadCompleted = NO;
+    
     [self urlRequestHandler];
     
     //[self.tableView registerClass:[StoreCell class] forCellReuseIdentifier:CellIdentifier];
@@ -65,6 +75,48 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
     
     
     _imageDownloadsInProgress = [NSMutableDictionary dictionary];
+    
+    
+    
+    //purchase
+    
+    self.products = [[NSMutableArray alloc] initWithCapacity:0];
+
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleProductRequestNotification:)
+                                                 name:IAPProductRequestNotification
+                                               object:[StoreManager sharedInstance]];
+    
+    //Activity
+    
+ /*   UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    CGRect frame = spinner.frame;
+    frame.origin.x = self.tableView.frame.size.width / 2 - frame.size.width / 2;
+    frame.origin.y = self.tableView.frame.size.height / 2 - frame.size.height / 2;
+    spinner.frame = frame;
+    [self.tableView addSubview:spinner];
+    [spinner startAnimating];*/
+    
+    [self setActivity];
+}
+
+-(void) setActivity
+{
+    spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    
+    UIView *view = self.parentViewController.view;
+    
+    //CGRect frame = spinner.frame;
+    //frame.origin.x = view.frame.size.width / 2 - frame.size.width / 2;
+    //frame.origin.y = self.view.frame.size.height / 2 - frame.size.height / 2;
+    //spinner.frame = frame;
+    spinner.center = view.center;
+    [view addSubview: spinner];
+    [view bringSubviewToFront:spinner];
+    spinner.hidesWhenStopped = YES;
+    spinner.hidden = NO;
+    [spinner startAnimating];
 }
 
 - (void)urlRequestHandler
@@ -117,6 +169,7 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
  
             self.parser.completionBlock = ^(void) {
                 [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                
                 if (weakParser.appRecordList != nil)
                 {
                     // The completion block may execute on any thread.  Because operations
@@ -131,9 +184,12 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
                         //(LatestViewController*)[(UINavigationController*)weakSelf.window.rootViewController topViewController];
                         //__weak typeof(self) weakSelf = self;
                         weakSelf.entries = weakParser.appRecordList;
- 
+                        
+                        [weakSelf fetchProductInformation];
+                        
                         // tell our table view to reload its data, now that parsing has completed
-                        [weakSelf.tableView reloadData];
+                        //[weakSelf.tableView reloadData];
+                        
                     });
                 }
                 // we are finished with the queue and our ParseOperation
@@ -197,9 +253,20 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
 // -------------------------------------------------------------------------------
 - (void)dealloc
 {
-    // terminate all pending download connections
     [self terminateAllDownloads];
+    
+    
+    // Unregister for StoreManager's notifications
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:IAPProductRequestNotification
+                                                  object:[StoreManager sharedInstance]];
+    
+    // Unregister for StoreObserver's notifications
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:IAPPurchaseNotification
+                                                  object:[StoreObserver sharedInstance]];
 }
+
 
 // -------------------------------------------------------------------------------
 //	didReceiveMemoryWarning
@@ -301,20 +368,71 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if ([[segue identifier] isEqualToString:@"showDetail"])
-    {
-        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        AppRecord *appRecord = (self.entries)[indexPath.row];
-        
-        NSLog(@"appRecord.title : %@",appRecord.title);
-        
-        //NSDate *object = self.objects[indexPath.row];
-        DetailViewController *controller =
-        (DetailViewController *)[segue destinationViewController];
-        
-        [controller setAppRecord:appRecord];
-    }
+    NSLog(@"productsDownloadCompleted : %d", productsDownloadCompleted);
+
+        if ([[segue identifier] isEqualToString:@"showDetail"])
+        {
+            NSLog(@"segue");
+            
+            NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+            AppRecord *appRecord = (self.entries)[indexPath.row];
+            
+            NSLog(@"appRecord.title : %@",appRecord.title);
+            
+            
+            //Price
+            
+//            NSLog(@"self.products count : %d", [self.products count]);
+            
+            MyModel *model = (self.products)[0];
+            NSArray *productRequestResponse = model.elements;
+            
+//            NSLog(@"productRequestResponse count :%d", [productRequestResponse count]);
+            
+            NSString *price;
+            SKProduct *aProduct;
+            
+            for (int i = 0; productRequestResponse.count > i ; i ++)
+            {
+                NSString *productId = [@"kr.co.highwill.TextAudioBooks." stringByAppendingString:appRecord.bookId];
+                
+                aProduct = productRequestResponse[i];
+                
+                if ([aProduct.productIdentifier isEqualToString:productId])
+                {
+                    NSString *titleName = aProduct.localizedTitle;
+                    
+                    price = [NSString stringWithFormat:@"%@ %@",[aProduct.priceLocale objectForKey:NSLocaleCurrencySymbol],aProduct.price];
+                    
+                    NSLog(@"title : %@", titleName);
+                    NSLog(@"price : %@", price);
+                    NSLog(@"prod id : %@", aProduct.productIdentifier);
+                    
+                    appRecord.price = price;
+                    
+                    break;
+                }
+            }
+            
+            
+            //NSDate *object = self.objects[indexPath.row];
+            DetailViewController *controller =
+            (DetailViewController *)[segue destinationViewController];
+            
+            [controller setAppRecord:appRecord];
+            [controller setSkProduct:aProduct];
+            
+            controller.navigationItem.leftItemsSupplementBackButton = YES;
+        }
 }
+
+-(BOOL)shouldPerformSegueWithIdentifier:(NSString *)identifier sender:(id)sender
+{
+    //appstore의 Skproduct이 완전히 다운로드 된 이후에 segue가 작동한다.
+
+    return productsDownloadCompleted;
+}
+
 
 
 #pragma mark - Table cell image support
@@ -392,5 +510,110 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
 {
     [self loadImagesForOnscreenRows];
 }
+
+#pragma mark Fetch product information
+// Retrieve product information from the App Store
+-(void)fetchProductInformation
+{
+    
+    NSLog(@"fetchProductInformation");
+    
+    // Query the App Store for product information if the user is is allowed to make purchases.
+    // Display an alert, otherwise.
+    if([SKPaymentQueue canMakePayments])
+    {
+ //       NSLog(@"self.entries.count %d", self.entries.count);
+        
+        NSMutableArray *productIds = [NSMutableArray array];
+        for (int i =0; i < self.entries.count; i++)
+        {
+            AppRecord *appRecord = (AppRecord *)[self.entries objectAtIndex:i];
+            NSString *productId = [@"kr.co.highwill.TextAudioBooks." stringByAppendingString:appRecord.bookId];
+            
+            //NSLog(@"productId : %@", productId);
+            
+            [productIds addObject:productId];
+        }
+        
+        //NSLog(@"products Ids count %d", productIds.count);
+        
+        [[StoreManager sharedInstance] fetchProductInformationForIds:productIds];
+    }
+    else
+    {
+        // Warn the user that they are not allowed to make purchases.
+        [self alertWithTitle:@"Warning" message:@"Purchases are disabled on this device."];
+    }
+}
+ 
+#pragma mark Display message
+
+-(void)alertWithTitle:(NSString *)title message:(NSString *)message
+{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
+                                                                   message:message
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *defaultAction = [UIAlertAction actionWithTitle:@"OK"
+                                                            style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * action) {}];
+    
+    [alert addAction:defaultAction];
+    
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+#pragma mark Handle product request notification
+
+// Update the UI according to the product request notification result
+-(void)handleProductRequestNotification:(NSNotification *)notification
+{
+    
+    NSLog(@"handleProductRequestNotification");
+    
+    
+    StoreManager *productRequestNotification = (StoreManager*)notification.object;
+    IAPProductRequestStatus result = (IAPProductRequestStatus)productRequestNotification.status;
+    
+    if (result == IAPProductRequestResponse)
+    {
+        // Switch to the iOSProductsList view controller and display its view
+        //   [self cycleFromViewController:self.currentViewController toViewController:self.productsList];
+        
+        // Set the data source for the Products view
+        // [self.productsList reloadUIWithData:productRequestNotification.productRequestResponse];
+        
+        self.products = productRequestNotification.productRequestResponse;
+        
+//        NSLog(@"productRequestNotification.productRequestResponse count = %d", [productRequestNotification.productRequestResponse count]);
+        
+         
+       /*  MyModel *model = (self.products)[0];
+         NSArray *productRequestResponse = model.elements;
+         
+        if ([self.products count] > 0)
+        {
+            SKProduct *aProduct = productRequestResponse[0];
+            
+            NSString *titleName = aProduct.localizedTitle;
+            
+            NSString *price = [NSString stringWithFormat:@"%@ %@",[aProduct.priceLocale objectForKey:NSLocaleCurrencySymbol],aProduct.price];
+            
+            NSLog(@"title : %@", titleName);
+            NSLog(@"price : %@", price);
+        }*/
+        
+        productsDownloadCompleted = YES;
+        [spinner stopAnimating];
+        [self.tableView reloadData];
+    }
+}
+
+
+
+
+
+
+
 
 @end

@@ -12,10 +12,6 @@
 		31214FEE1DA0E69200A69D9A /* DetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 31214FED1DA0E69200A69D9A /* DetailViewController.m */; };
 		31214FF31DA0E69200A69D9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 31214FF21DA0E69200A69D9A /* Assets.xcassets */; };
 		312151281DA28EE000A69D9A /* BookViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 312151271DA28EE000A69D9A /* BookViewController.m */; };
-		312151311DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3121512C1DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.mp3 */; };
-		312151321DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.xml in Resources */ = {isa = PBXBuildFile; fileRef = 3121512D1DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.xml */; };
-		312151331DA2920E00A69D9A /* list.xml in Resources */ = {isa = PBXBuildFile; fileRef = 3121512E1DA2920E00A69D9A /* list.xml */; };
-		312151341DA2920E00A69D9A /* iPhoneBack.png in Resources */ = {isa = PBXBuildFile; fileRef = 312151301DA2920E00A69D9A /* iPhoneBack.png */; };
 		312151471DA7E8A800A69D9A /* libnetwork.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 312151461DA7E8A800A69D9A /* libnetwork.tbd */; };
 		3121514E1DA9241900A69D9A /* IconDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 312151491DA9241900A69D9A /* IconDownloader.m */; };
 		3121514F1DA9241900A69D9A /* LatestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3121514B1DA9241900A69D9A /* LatestViewController.m */; };
@@ -66,10 +62,6 @@
 		31214FF71DA0E69200A69D9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		312151261DA28E0100A69D9A /* BookViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookViewController.h; sourceTree = "<group>"; };
 		312151271DA28EE000A69D9A /* BookViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookViewController.m; sourceTree = "<group>"; };
-		3121512C1DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = aroundtheworldineightydays_01_verne_64kb.mp3; sourceTree = "<group>"; };
-		3121512D1DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = aroundtheworldineightydays_01_verne_64kb.xml; sourceTree = "<group>"; };
-		3121512E1DA2920E00A69D9A /* list.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = list.xml; sourceTree = "<group>"; };
-		312151301DA2920E00A69D9A /* iPhoneBack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = iPhoneBack.png; sourceTree = "<group>"; };
 		312151461DA7E8A800A69D9A /* libnetwork.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libnetwork.tbd; path = usr/lib/libnetwork.tbd; sourceTree = SDKROOT; };
 		312151481DA9241900A69D9A /* IconDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IconDownloader.h; sourceTree = "<group>"; };
 		312151491DA9241900A69D9A /* IconDownloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IconDownloader.m; sourceTree = "<group>"; };
@@ -181,7 +173,6 @@
 			isa = PBXGroup;
 			children = (
 				7A41D3C01DADF76E000D3AB1 /* Common */,
-				312151291DA291FF00A69D9A /* Sample */,
 				3121511E1DA285B000A69D9A /* ViewController */,
 				3121511D1DA285A600A69D9A /* Commons */,
 				3121511C1DA2858F00A69D9A /* Purchase */,
@@ -271,41 +262,6 @@
 				3121515A1DAA83BB00A69D9A /* Book */,
 			);
 			name = Library;
-			sourceTree = "<group>";
-		};
-		312151291DA291FF00A69D9A /* Sample */ = {
-			isa = PBXGroup;
-			children = (
-				3121512A1DA2920E00A69D9A /* 80days_preview */,
-			);
-			name = Sample;
-			sourceTree = "<group>";
-		};
-		3121512A1DA2920E00A69D9A /* 80days_preview */ = {
-			isa = PBXGroup;
-			children = (
-				3121512B1DA2920E00A69D9A /* audios */,
-				3121512F1DA2920E00A69D9A /* images */,
-			);
-			path = 80days_preview;
-			sourceTree = "<group>";
-		};
-		3121512B1DA2920E00A69D9A /* audios */ = {
-			isa = PBXGroup;
-			children = (
-				3121512C1DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.mp3 */,
-				3121512D1DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.xml */,
-				3121512E1DA2920E00A69D9A /* list.xml */,
-			);
-			path = audios;
-			sourceTree = "<group>";
-		};
-		3121512F1DA2920E00A69D9A /* images */ = {
-			isa = PBXGroup;
-			children = (
-				312151301DA2920E00A69D9A /* iPhoneBack.png */,
-			);
-			path = images;
 			sourceTree = "<group>";
 		};
 		312151381DA6866D00A69D9A /* Cover */ = {
@@ -417,8 +373,8 @@
 		7A41D3BF1DADF6E6000D3AB1 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				7A41D3C11DADFE35000D3AB1 /* StoreCell.m */,
 				312151541DAA45E400A69D9A /* StoreCell.h */,
+				7A41D3C11DADFE35000D3AB1 /* StoreCell.m */,
 				3121514A1DA9241900A69D9A /* LatestViewController.h */,
 				3121514B1DA9241900A69D9A /* LatestViewController.m */,
 				31214FEC1DA0E69200A69D9A /* DetailViewController.h */,
@@ -520,14 +476,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				31214FF31DA0E69200A69D9A /* Assets.xcassets in Resources */,
-				312151321DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.xml in Resources */,
 				7A41D3A41DACA936000D3AB1 /* Info.plist in Resources */,
 				7AA049CF1DA4BF38006A8CB4 /* play-off~iphone@3x.png in Resources */,
-				312151331DA2920E00A69D9A /* list.xml in Resources */,
-				312151311DA2920E00A69D9A /* aroundtheworldineightydays_01_verne_64kb.mp3 in Resources */,
 				7A41D3701DAB4935000D3AB1 /* Main.storyboard in Resources */,
 				7A41D33B1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png in Resources */,
-				312151341DA2920E00A69D9A /* iPhoneBack.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

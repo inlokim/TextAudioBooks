@@ -15,6 +15,9 @@
 @interface BookViewController : UITableViewController <NSXMLParserDelegate,  AVAudioPlayerDelegate>
 
 @property (strong, nonatomic) AppRecord *appRecord;
-@property (strong, nonatomic) NSString *fileId;
+//@property (strong, nonatomic) NSString *fileId;
+@property (strong, nonatomic) NSIndexPath *contentsIndex;
+@property (strong, nonatomic) NSMutableArray *contentsArray;
+
 
 @end

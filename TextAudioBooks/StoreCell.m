@@ -14,6 +14,7 @@ Custom collection view cell for image and its label.
 @synthesize titleLabel;
 @synthesize authorLabel;
 @synthesize imageView;
+@synthesize sampleView;
 
 /*
 - (instancetype)initWithCoder:(NSCoder *)aDecoder

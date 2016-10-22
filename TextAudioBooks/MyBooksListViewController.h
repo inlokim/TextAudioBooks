@@ -19,7 +19,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MyBooksListViewController : UITableViewController
+@interface MyBooksListViewController : UITableViewController <NSURLSessionDelegate>
 
 // the main data model for our UITableView
 //@property (nonatomic, strong) NSArray *entries;

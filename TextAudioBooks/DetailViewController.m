@@ -11,7 +11,9 @@
 #import "Utils.h"
 #import "SSZipArchive.h"
 #import "AppDelegate.h"
-
+#import "MyModel.h"
+#import "StoreManager.h"
+#import "StoreObserver.h"
 
 #define SAMPLE NO
 #define FULL YES
@@ -41,7 +43,7 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     
     NSString *fileName;
     Boolean downloadType;
-    
+    UIActivityIndicatorView *spinner;
 }
 
 @property (nonatomic, strong) NSURLSession *session;
@@ -53,7 +55,7 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 @implementation DetailViewController
 
 @synthesize appRecord;
-
+@synthesize skProduct;
 
 
 - (void)viewDidLoad {
@@ -66,6 +68,9 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     [getSampleProgressView setHidden:YES];
     [getSampleProgressLabel setHidden:YES];
     
+    [purchaseProgressView setHidden:YES];
+    [purchaseProgressLabel setHidden:YES];
+    
     // Do any additional setup after loading the view, typically from a nib.
     NSLog(@"appRecord.title :%@", appRecord.title);
     
@@ -75,7 +80,8 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     readByLabel.text = [@"Read By " stringByAppendingString:appRecord.reader];
     sizeLabel.text = [@"Size : " stringByAppendingString:appRecord.size];
     runningTimeLabel.text = [@"Running Time : " stringByAppendingString:appRecord.time];
-    
+
+    [purchaseButton setTitle:appRecord.price forState:UIControlStateNormal];
     
     contentLabel.text = appRecord.content;
     
@@ -85,14 +91,16 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     
     //Download
     
-    [self initializeFileDownloadDataArray];
+   // [self initializeFileDownloadDataArray];
     
     NSArray *URLs = [[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask];
     self.docDirectoryURL = [URLs objectAtIndex:0];
     
     NSLog(@"docDirectoryURL : %@",[self.docDirectoryURL path] );
+    u_int32_t randomNumber = arc4random();
+    NSString *sessionId = [NSString stringWithFormat:@"%@.%@%d", @"kr.co.highwill.TextAudioBooks", appRecord.bookId, randomNumber];
     
-    NSString *sessionId = [NSString stringWithFormat:@"%@.%@", @"kr.co.highwill.TextAudioBooks", appRecord.bookId];
+    NSLog(@"session id = %@", sessionId);
     
     NSURLSessionConfiguration *sessionConfiguration
     = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:sessionId];
@@ -103,14 +111,32 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
                                             delegateQueue:nil];
     
     
-    //Menu visible / hidden
+    //purchase
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handlePurchasesNotification:)
+                                                 name:IAPPurchaseNotification
+                                               object:[StoreObserver sharedInstance]];
     
     
 }
 
+-(void) viewDidAppear:(BOOL)animated
+{
+    NSLog(@"viewDidAppear");
+    
+    //[self viewDidLoad];
+}
+
+
+-(void) viewWillDisappear:(BOOL)animated
+{
+    //[self activityIndicatorVisible:NO];
+}
 
 -(void) viewWillAppear:(BOOL)animated
 {
+     NSLog(@"viewWillAppear");
     //-------------------
     // 버튼 SHOW/HIDE
     //-------------------
@@ -131,29 +157,64 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     {
         NSArray *array = [[NSArray alloc] initWithContentsOfFile:filePath];
 
-        for (int i=0; i < [array count] ; i ++)
+        if (array.count > 0)
         {
-            NSString *string = [array objectAtIndex:i];
-            NSArray *chunks = [string componentsSeparatedByString: @":"];
             
-            NSString *myBookId = [chunks objectAtIndex:0];
-            NSLog(@"myBookId=%@ appRecord.bookId=%@",myBookId, appRecord.bookId);
-            
-            NSString *flag = [chunks objectAtIndex:3];
-            //My Books에 같은 책이 존재한다면 버튼을 Hide
-            if ([myBookId isEqual:appRecord.bookId])
+            for (int i=0; i < [array count] ; i ++)
             {
-                if ([flag isEqual:@"1"]) sampleButton.hidden = YES;
-                else if ([flag isEqual:@"2"])
+                NSString *string = [array objectAtIndex:i];
+                NSArray *chunks = [string componentsSeparatedByString: @":"];
+                
+                NSString *myBookId = [chunks objectAtIndex:0];
+                NSLog(@"myBookId=%@ appRecord.bookId=%@",myBookId, appRecord.bookId);
+                
+                NSString *flag = [chunks objectAtIndex:3];
+                
+                //My Books에 같은 책이 존재한다면 버튼을 Hide
+                if ([myBookId isEqual:appRecord.bookId])
                 {
-                    sampleButton.hidden = YES;
-                    purchaseButton.hidden = YES;
+                    if ([flag isEqual:@"1"])
+                    {
+                        sampleButton.hidden = YES;
+                    }
+                    else if ([flag isEqual:@"2"])
+                    {
+                        sampleButton.hidden = YES;
+                        purchaseButton.hidden = YES;
+                    }
+                    break;
                 }
             }
+        }
+        else
+        {
+            sampleButton.hidden = NO;
+            purchaseButton.hidden = NO;
         }
     }
 }
 
+-(void) activityIndicatorVisible:(Boolean)show
+{
+    if (show)
+    {
+        spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+        
+        UIView *view = self.parentViewController.view;
+        
+        spinner.center = view.center;
+        [view addSubview: spinner];
+        [view bringSubviewToFront:spinner];
+        spinner.hidesWhenStopped = YES;
+        spinner.hidden = NO;
+        [spinner startAnimating];
+    }
+    else
+    {
+        [spinner stopAnimating];
+        [spinner removeFromSuperview];
+    }
+}
 
 -(void)viewDidLayoutSubviews
 {
@@ -172,10 +233,15 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 
 #pragma mark - purchase
 
-- (IBAction)purchaseButtonPressed:(id)sender {
+- (IBAction)purchaseButtonPressed:(id)sender
+{
     
     downloadType = FULL;
-
+    
+ //   NSLog(@"##prod id : %@", skProduct.productIdentifier);
+ //  [[StoreObserver sharedInstance] buy:skProduct];
+    [self initializeFileDownloadDataArray];
+    [self startDownload];
 }
 
 
@@ -184,6 +250,7 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 - (IBAction)getSampleButtonPressed:(id)sender {
     
     downloadType = SAMPLE;
+    [self initializeFileDownloadDataArray];
     [self startDownload];
 }
 
@@ -264,8 +331,13 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 {
     self.arrFileDownloadData = [[NSMutableArray alloc] init];
 
-    if (downloadType == SAMPLE) fileName = [NSString stringWithFormat:@"%@_preview.zip",appRecord.bookId];
-    else if (downloadType == FULL) fileName = [NSString stringWithFormat:@"%@_full.zip",appRecord.bookId];
+    if (downloadType == SAMPLE)
+        fileName = [NSString stringWithFormat:@"%@_preview.zip",appRecord.bookId];
+    else if (downloadType == FULL)
+        fileName = [NSString stringWithFormat:@"%@_full.zip",appRecord.bookId];
+    
+    NSLog(@"##downloadType : %d", downloadType);
+    NSLog(@"##fileName : %@", fileName);
     
     [self.arrFileDownloadData addObject:[[FileDownloadInfo alloc] initWithFileTitle:appRecord.bookId andDownloadSource:[fileHome stringByAppendingString:fileName]]];
 }
@@ -288,20 +360,29 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 
 - (void) startDownload
 {
+    [self activityIndicatorVisible:YES];
+    //self.navigationController.navigationItem.backBarButtonItem.enabled = NO;
+    self.navigationController.navigationItem.leftBarButtonItem.enabled = NO;
     
-    NSLog(@"homeDir : %@", [Utils homeDir]);
+    NSLog(@"##downloadType : %d", downloadType);
+    //NSLog(@"homeDir : %@", [Utils homeDir]);
     
     // Access all FileDownloadInfo objects using a loop.
-    for (int i=0; i<[self.arrFileDownloadData count]; i++) {
+    for (int i=0; i<[self.arrFileDownloadData count]; i++)
+    {
         FileDownloadInfo *fdi = [self.arrFileDownloadData objectAtIndex:i];
         
         // Check if a file is already being downloaded or not.
-        if (!fdi.isDownloading) {
+        if (!fdi.isDownloading)
+        {
             // Check if should create a new download task using a URL, or using resume data.
-            if (fdi.taskIdentifier == -1) {
+            if (fdi.taskIdentifier == -1)
+            {
+                NSLog(@"taskIdentifier == -1");
                 fdi.downloadTask = [self.session downloadTaskWithURL:[NSURL URLWithString:fdi.downloadSource]];
             }
-            else{
+            else
+            {
                 fdi.downloadTask = [self.session downloadTaskWithResumeData:fdi.taskResumeData];
             }
             
@@ -313,7 +394,8 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
             
             // Indicate for each file that is being downloaded.
             fdi.isDownloading = YES;
-        }
+            
+       }
     }
 }
 
@@ -335,7 +417,10 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
                                         toURL:destinationURL
                                         error:&error];
     
-    if (success) {
+    if (success)
+    {
+        NSLog(@"download success");
+        
         // Change the flag values of the respective FileDownloadInfo object.
         int index = [self getFileDownloadInfoIndexWithTaskIdentifier:downloadTask.taskIdentifier];
         FileDownloadInfo *fdi = [self.arrFileDownloadData objectAtIndex:index];
@@ -357,6 +442,9 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
             
         }];
         
+        fdi.downloadProgress = 0.0;
+        
+        
     }
     else{
         NSLog(@"Unable to copy temp file. Error: %@", [error localizedDescription]);
@@ -366,6 +454,8 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 
 -(void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error
 {
+    NSLog(@"URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError");
+    
     if (error != nil)
     {
         NSLog(@"Download completed with error: %@", [error localizedDescription]);
@@ -389,6 +479,12 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
         
         NSLog(@"Download finished successfully.");
         
+        [self activityIndicatorVisible:NO];
+        
+        //self.navigationController.navigationItem.backBarButtonItem.enabled = YES;
+        
+        self.navigationController.navigationItem.leftBarButtonItem.enabled = YES;
+        
         [self.tabBarController setSelectedIndex:0];
         
        // [alert dismissWithClickedButtonIndex:0 animated:YES];
@@ -398,7 +494,17 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
             [self viewWillAppear:YES];
         });
         
-        //[self.view setNeedsDisplay];
+        
+  /*      // Cancel the task.
+        [fdi.downloadTask cancel];
+        
+        // Change all related properties.
+        fdi.isDownloading = NO;
+        fdi.taskIdentifier = -1;
+        fdi.downloadProgress = 0.0;*/
+
+        
+
     }
 }
 
@@ -417,6 +523,13 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     NSString *zipFile = [NSString stringWithFormat:@"%@/%@",[Utils homeDir],fileName];
     NSFileManager *fileManager = [NSFileManager defaultManager];
     [fileManager removeItemAtPath:zipFile error:NULL];
+    
+    if (downloadType == FULL)
+    {
+        NSString *prevFile = [NSString stringWithFormat:@"%@/%@_preview",[Utils homeDir],appRecord.bookId];
+        fileManager = [NSFileManager defaultManager];
+        [fileManager removeItemAtPath:prevFile error:NULL];
+    }
 }
 
 
@@ -425,12 +538,13 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     if (totalBytesExpectedToWrite == NSURLSessionTransferSizeUnknown) {
         NSLog(@"Unknown transfer size");
     }
-    else{
+    else
+    {
         // Locate the FileDownloadInfo object among all based on the taskIdentifier property of the task.
         int index = [self getFileDownloadInfoIndexWithTaskIdentifier:downloadTask.taskIdentifier];
         FileDownloadInfo *fdi = [self.arrFileDownloadData objectAtIndex:index];
         
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{    
             // Calculate the progress.
             fdi.downloadProgress = (double)totalBytesWritten / (double)totalBytesExpectedToWrite;
             
@@ -440,7 +554,6 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
            
             if (downloadType == SAMPLE)
             {
-                
                 [sampleButton setHidden:YES];
                 
                 [getSampleProgressView setHidden:NO];
@@ -459,17 +572,20 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
                 [purchaseProgressView setHidden:NO];
                 [purchaseProgressLabel setHidden:NO];
                 
-                getSampleProgressView.progress = fdi.downloadProgress;
+                purchaseProgressView.progress = fdi.downloadProgress;
                 
                 double value = (double)totalBytesWritten / (double)totalBytesExpectedToWrite * 100;
-                getSampleProgressLabel.text = [NSString stringWithFormat:@"%.1f %%", value];
+                purchaseProgressLabel.text = [NSString stringWithFormat:@"%.1f %%", value];
             }
         }];
     }
 }
 
 
--(void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session{
+-(void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session
+{
+    NSLog(@"URLSessionDidFinishEventsForBackgroundURLSession");
+    
     AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
     
     // Check if all download tasks have been finished.
@@ -496,6 +612,104 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
             }
         }
     }];
+}
+
+
+
+#pragma mark Handle purchase request notification
+
+// Update the UI according to the purchase request notification result
+-(void)handlePurchasesNotification:(NSNotification *)notification
+{
+    NSLog(@"handlePurchasesNotification");
+    
+    
+    StoreObserver *purchasesNotification = (StoreObserver *)notification.object;
+    IAPPurchaseNotificationStatus status = (IAPPurchaseNotificationStatus)purchasesNotification.status;
+    
+    switch (status)
+    {
+            
+        case IAPPurchaseSucceeded:
+        {
+            NSLog(@"IAPPurchaseSucceeded !!!");
+            [self startDownload];
+        }
+            break;
+        case IAPPurchaseFailed:
+        {
+            [self alertWithTitle:@"Purchase Status" message:purchasesNotification.message];
+        }
+            break;
+            // Switch to the iOSPurchasesList view controller when receiving a successful restore notification
+        case IAPRestoredSucceeded:
+        {
+            
+            NSLog(@"IAPRestoredSucceeded");
+            
+            [self startDownload];
+            
+        }
+            break;
+        case IAPRestoredFailed:
+        {
+            NSLog(@"IAPRestoredFailed");
+            
+            [self alertWithTitle:@"Purchase Status" message:purchasesNotification.message];
+        }
+            break;
+            // Notify the user that downloading is about to start when receiving a download started notification
+        case IAPDownloadStarted:
+        {
+            NSLog(@"IAPDownloadStarted");
+            //  self.hasDownloadContent = YES;
+            //  [self.view addSubview:self.statusMessage];
+        }
+            break;
+            // Display a status message showing the download progress
+        case IAPDownloadInProgress:
+        {
+            NSLog(@"IAPDownloadInProgress");
+            
+            //  self.hasDownloadContent = YES;
+            //  NSString *title = [[StoreManager sharedInstance] titleMatchingProductIdentifier:purchasesNotification.purchasedID];
+            //  NSString *displayedTitle = (title.length > 0) ? title : purchasesNotification.purchasedID;
+            // self.statusMessage.text = [NSString stringWithFormat:@" Downloading %@   %.2f%%",displayedTitle, purchasesNotification.downloadProgress];
+        }
+            break;
+            // Downloading is done, remove the status message
+        case IAPDownloadSucceeded:
+        {
+            NSLog(@"IAPDownloadSucceeded");
+            
+            
+            //  self.hasDownloadContent = NO;
+            //  self.statusMessage.text = @"Download complete: 100%";
+            
+            // Remove the message after 2 seconds
+            //[self performSelector:@selector(hideStatusMessage) withObject:nil afterDelay:2];
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+#pragma mark Display message
+
+-(void)alertWithTitle:(NSString *)title message:(NSString *)message
+{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
+                                                                   message:message
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *defaultAction = [UIAlertAction actionWithTitle:@"OK"
+                                                            style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * action) {}];
+    
+    [alert addAction:defaultAction];
+    
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 
