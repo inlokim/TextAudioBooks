@@ -1,0 +1,18 @@
+//
+// Prefix header for all source files of the 'TBXML-iOS' target in the 'TBXML-iOS' project
+//
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+#endif
+
+
+/*Debug시에 막는다.*/
+
+#ifdef DEBUG
+#define NSLog(fmt, ...)
+//NSLog((@"%s/%d\n\t : " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+#else
+#define NSLog(...)
+#endif
+

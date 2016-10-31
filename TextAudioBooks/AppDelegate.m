@@ -20,7 +20,7 @@
     [[SKPaymentQueue defaultQueue] addTransactionObserver:[StoreObserver sharedInstance]];
     
     // NSLog(@"test1");
-    
+    self.arrFileDownloadData = [[NSMutableArray alloc] init];
     
     return YES;
 }

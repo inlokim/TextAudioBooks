@@ -17,6 +17,8 @@
 		3121514F1DA9241900A69D9A /* LatestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3121514B1DA9241900A69D9A /* LatestViewController.m */; };
 		312151501DA9241900A69D9A /* ParseOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 3121514D1DA9241900A69D9A /* ParseOperation.m */; };
 		312151531DA9243B00A69D9A /* AppRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 312151521DA9243B00A69D9A /* AppRecord.m */; };
+		3121515D1DBCE64F00A69D9A /* MyBooksCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3121515C1DBCE64F00A69D9A /* MyBooksCell.m */; };
+		3121515F1DBEE6E200A69D9A /* libSystem.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 3121515E1DBEE6E200A69D9A /* libSystem.tbd */; };
 		7A41D33B1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7A41D33A1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png */; };
 		7A41D33F1DA5DFD3000D3AB1 /* BookTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D33E1DA5DFD3000D3AB1 /* BookTableViewCell.m */; };
 		7A41D3431DA62B61000D3AB1 /* ContentsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D3421DA62B61000D3AB1 /* ContentsViewController.m */; };
@@ -47,6 +49,10 @@
 		7A41D3C21DADFE35000D3AB1 /* StoreCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D3C11DADFE35000D3AB1 /* StoreCell.m */; };
 		7A41D3CB1DAF5376000D3AB1 /* CustomSegue.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D3C91DAF5376000D3AB1 /* CustomSegue.m */; };
 		7A41D3CE1DAF539E000D3AB1 /* CustomUnwindSegue.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A41D3CD1DAF539E000D3AB1 /* CustomUnwindSegue.m */; };
+		7A5D8DE01DC325750066C5A1 /* TBXML+Compression.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A5D8DD91DC325750066C5A1 /* TBXML+Compression.m */; };
+		7A5D8DE11DC325750066C5A1 /* TBXML+HTTP.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A5D8DDA1DC325750066C5A1 /* TBXML+HTTP.m */; };
+		7A5D8DE21DC325750066C5A1 /* TBXML.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A5D8DDB1DC325750066C5A1 /* TBXML.m */; };
+		7A5D8DE51DC327BC0066C5A1 /* Script.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A5D8DE41DC327BC0066C5A1 /* Script.m */; };
 		7AA049CD1DA37C0F006A8CB4 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AA049CC1DA37C0F006A8CB4 /* Utils.m */; };
 		7AA049CF1DA4BF38006A8CB4 /* play-off~iphone@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7AA049CE1DA4BF38006A8CB4 /* play-off~iphone@3x.png */; };
 /* End PBXBuildFile section */
@@ -72,6 +78,9 @@
 		312151511DA9243B00A69D9A /* AppRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppRecord.h; sourceTree = "<group>"; };
 		312151521DA9243B00A69D9A /* AppRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppRecord.m; sourceTree = "<group>"; };
 		312151541DAA45E400A69D9A /* StoreCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StoreCell.h; sourceTree = "<group>"; };
+		3121515B1DBCE64F00A69D9A /* MyBooksCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyBooksCell.h; sourceTree = "<group>"; };
+		3121515C1DBCE64F00A69D9A /* MyBooksCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyBooksCell.m; sourceTree = "<group>"; };
+		3121515E1DBEE6E200A69D9A /* libSystem.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libSystem.tbd; path = usr/lib/libSystem.tbd; sourceTree = SDKROOT; };
 		7A41D33A1DA4C4CD000D3AB1 /* speaker_off~iphone@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "speaker_off~iphone@2x.png"; path = "images/speaker_off~iphone@2x.png"; sourceTree = "<group>"; };
 		7A41D33E1DA5DFD3000D3AB1 /* BookTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookTableViewCell.m; sourceTree = "<group>"; };
 		7A41D3401DA5E31F000D3AB1 /* BookTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookTableViewCell.h; sourceTree = "<group>"; };
@@ -132,6 +141,15 @@
 		7A41D3C91DAF5376000D3AB1 /* CustomSegue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomSegue.m; sourceTree = "<group>"; };
 		7A41D3CC1DAF539E000D3AB1 /* CustomUnwindSegue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomUnwindSegue.h; sourceTree = "<group>"; };
 		7A41D3CD1DAF539E000D3AB1 /* CustomUnwindSegue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomUnwindSegue.m; sourceTree = "<group>"; };
+		7A5D8DD91DC325750066C5A1 /* TBXML+Compression.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "TBXML+Compression.m"; sourceTree = "<group>"; };
+		7A5D8DDA1DC325750066C5A1 /* TBXML+HTTP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "TBXML+HTTP.m"; sourceTree = "<group>"; };
+		7A5D8DDB1DC325750066C5A1 /* TBXML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TBXML.m; sourceTree = "<group>"; };
+		7A5D8DDD1DC325750066C5A1 /* TBXML+Compression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TBXML+Compression.h"; sourceTree = "<group>"; };
+		7A5D8DDE1DC325750066C5A1 /* TBXML+HTTP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TBXML+HTTP.h"; sourceTree = "<group>"; };
+		7A5D8DDF1DC325750066C5A1 /* TBXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TBXML.h; sourceTree = "<group>"; };
+		7A5D8DE31DC327BC0066C5A1 /* Script.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Script.h; sourceTree = "<group>"; };
+		7A5D8DE41DC327BC0066C5A1 /* Script.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Script.m; sourceTree = "<group>"; };
+		7A5D8DE71DC328820066C5A1 /* TBXML-iOS-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TBXML-iOS-Prefix.pch"; sourceTree = "<group>"; };
 		7AA049CB1DA37C0F006A8CB4 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		7AA049CC1DA37C0F006A8CB4 /* Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
 		7AA049CE1DA4BF38006A8CB4 /* play-off~iphone@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "play-off~iphone@3x.png"; path = "images/play-off~iphone@3x.png"; sourceTree = "<group>"; };
@@ -142,6 +160,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3121515F1DBEE6E200A69D9A /* libSystem.tbd in Frameworks */,
 				7A41D3BA1DACAEA7000D3AB1 /* libz.tbd in Frameworks */,
 				312151471DA7E8A800A69D9A /* libnetwork.tbd in Frameworks */,
 				7A41D3B51DACAE26000D3AB1 /* StoreKit.framework in Frameworks */,
@@ -239,29 +258,29 @@
 		3121511E1DA285B000A69D9A /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				312151211DA2869600A69D9A /* Library */,
-				3121511F1DA285F500A69D9A /* Store */,
+				312151211DA2869600A69D9A /* MyBooks */,
+				3121511F1DA285F500A69D9A /* BookStore */,
 			);
 			name = ViewController;
 			sourceTree = "<group>";
 		};
-		3121511F1DA285F500A69D9A /* Store */ = {
+		3121511F1DA285F500A69D9A /* BookStore */ = {
 			isa = PBXGroup;
 			children = (
 				7A41D3BF1DADF6E6000D3AB1 /* ViewController */,
 			);
-			name = Store;
+			name = BookStore;
 			sourceTree = "<group>";
 		};
-		312151211DA2869600A69D9A /* Library */ = {
+		312151211DA2869600A69D9A /* MyBooks */ = {
 			isa = PBXGroup;
 			children = (
-				7A41D3BB1DADDF1C000D3AB1 /* MyBooks */,
+				7A41D3BB1DADDF1C000D3AB1 /* List */,
 				312151381DA6866D00A69D9A /* Cover */,
 				7A41D3411DA62B3F000D3AB1 /* Contents */,
 				3121515A1DAA83BB00A69D9A /* Book */,
 			);
-			name = Library;
+			name = MyBooks;
 			sourceTree = "<group>";
 		};
 		312151381DA6866D00A69D9A /* Cover */ = {
@@ -276,6 +295,7 @@
 		312151451DA7E8A800A69D9A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3121515E1DBEE6E200A69D9A /* libSystem.tbd */,
 				7A41D3B91DACAEA7000D3AB1 /* libz.tbd */,
 				7A41D3B41DACAE26000D3AB1 /* StoreKit.framework */,
 				312151461DA7E8A800A69D9A /* libnetwork.tbd */,
@@ -286,6 +306,8 @@
 		3121515A1DAA83BB00A69D9A /* Book */ = {
 			isa = PBXGroup;
 			children = (
+				7A5D8DE31DC327BC0066C5A1 /* Script.h */,
+				7A5D8DE41DC327BC0066C5A1 /* Script.m */,
 				312151261DA28E0100A69D9A /* BookViewController.h */,
 				312151271DA28EE000A69D9A /* BookViewController.m */,
 				7A41D3401DA5E31F000D3AB1 /* BookTableViewCell.h */,
@@ -361,13 +383,15 @@
 			path = minizip;
 			sourceTree = "<group>";
 		};
-		7A41D3BB1DADDF1C000D3AB1 /* MyBooks */ = {
+		7A41D3BB1DADDF1C000D3AB1 /* List */ = {
 			isa = PBXGroup;
 			children = (
+				3121515B1DBCE64F00A69D9A /* MyBooksCell.h */,
+				3121515C1DBCE64F00A69D9A /* MyBooksCell.m */,
 				7A41D3BC1DADDF38000D3AB1 /* MyBooksListViewController.h */,
 				7A41D3BD1DADDF38000D3AB1 /* MyBooksListViewController.m */,
 			);
-			name = MyBooks;
+			name = List;
 			sourceTree = "<group>";
 		};
 		7A41D3BF1DADF6E6000D3AB1 /* ViewController */ = {
@@ -386,6 +410,9 @@
 		7A41D3C01DADF76E000D3AB1 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				7A5D8DE61DC328820066C5A1 /* TBXML-Support */,
+				7A5D8DD81DC325750066C5A1 /* TBXML-Code */,
+				7A5D8DDC1DC325750066C5A1 /* TBXML-Headers */,
 				7A41D3CF1DAF53A6000D3AB1 /* Segue */,
 				312151511DA9243B00A69D9A /* AppRecord.h */,
 				312151521DA9243B00A69D9A /* AppRecord.m */,
@@ -406,6 +433,34 @@
 				7A41D3C91DAF5376000D3AB1 /* CustomSegue.m */,
 			);
 			name = Segue;
+			sourceTree = "<group>";
+		};
+		7A5D8DD81DC325750066C5A1 /* TBXML-Code */ = {
+			isa = PBXGroup;
+			children = (
+				7A5D8DD91DC325750066C5A1 /* TBXML+Compression.m */,
+				7A5D8DDA1DC325750066C5A1 /* TBXML+HTTP.m */,
+				7A5D8DDB1DC325750066C5A1 /* TBXML.m */,
+			);
+			path = "TBXML-Code";
+			sourceTree = "<group>";
+		};
+		7A5D8DDC1DC325750066C5A1 /* TBXML-Headers */ = {
+			isa = PBXGroup;
+			children = (
+				7A5D8DDD1DC325750066C5A1 /* TBXML+Compression.h */,
+				7A5D8DDE1DC325750066C5A1 /* TBXML+HTTP.h */,
+				7A5D8DDF1DC325750066C5A1 /* TBXML.h */,
+			);
+			path = "TBXML-Headers";
+			sourceTree = "<group>";
+		};
+		7A5D8DE61DC328820066C5A1 /* TBXML-Support */ = {
+			isa = PBXGroup;
+			children = (
+				7A5D8DE71DC328820066C5A1 /* TBXML-iOS-Prefix.pch */,
+			);
+			path = "TBXML-Support";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -493,12 +548,15 @@
 				7A41D3A01DACA936000D3AB1 /* hmac.c in Sources */,
 				3121514E1DA9241900A69D9A /* IconDownloader.m in Sources */,
 				7A41D39F1DACA936000D3AB1 /* fileenc.c in Sources */,
+				3121515D1DBCE64F00A69D9A /* MyBooksCell.m in Sources */,
 				7A41D3471DA7621E000D3AB1 /* BookCoverViewController.m in Sources */,
 				7A41D3B81DACAE6E000D3AB1 /* MyModel.m in Sources */,
 				7A41D3AA1DACA936000D3AB1 /* SSZipArchive.m in Sources */,
+				7A5D8DE51DC327BC0066C5A1 /* Script.m in Sources */,
 				7A41D3A71DACA936000D3AB1 /* unzip.c in Sources */,
 				7A41D3431DA62B61000D3AB1 /* ContentsViewController.m in Sources */,
 				312151531DA9243B00A69D9A /* AppRecord.m in Sources */,
+				7A5D8DE11DC325750066C5A1 /* TBXML+HTTP.m in Sources */,
 				7A41D3B21DACADBE000D3AB1 /* StoreManager.m in Sources */,
 				7A41D39E1DACA936000D3AB1 /* entropy.c in Sources */,
 				312151281DA28EE000A69D9A /* BookViewController.m in Sources */,
@@ -511,7 +569,9 @@
 				7A41D3A21DACA936000D3AB1 /* pwd2key.c in Sources */,
 				7A41D3A11DACA936000D3AB1 /* prng.c in Sources */,
 				7A41D3CE1DAF539E000D3AB1 /* CustomUnwindSegue.m in Sources */,
+				7A5D8DE01DC325750066C5A1 /* TBXML+Compression.m in Sources */,
 				7A41D3C21DADFE35000D3AB1 /* StoreCell.m in Sources */,
+				7A5D8DE21DC325750066C5A1 /* TBXML.m in Sources */,
 				312151501DA9241900A69D9A /* ParseOperation.m in Sources */,
 				7A41D3BE1DADDF38000D3AB1 /* MyBooksListViewController.m in Sources */,
 				7A41D33F1DA5DFD3000D3AB1 /* BookTableViewCell.m in Sources */,
@@ -634,6 +694,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = JN4U23SWSX;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/TextAudioBooks/TBXML-Support/TBXML-iOS-Prefix.pch";
 				INFOPLIST_FILE = TextAudioBooks/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -647,6 +708,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = JN4U23SWSX;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/TextAudioBooks/TBXML-Support/TBXML-iOS-Prefix.pch";
 				INFOPLIST_FILE = TextAudioBooks/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

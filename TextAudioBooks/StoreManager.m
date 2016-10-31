@@ -53,7 +53,7 @@ NSString * const IAPProductRequestNotification = @"IAPProductRequestNotification
 -(void)fetchProductInformationForIds:(NSArray *)productIds
 {
     
-    NSLog(@"productsIds : %d", productIds.count);
+    //NSLog(@"productsIds : %d", productIds.count);
     
     self.productRequestResponse = [[NSMutableArray alloc] initWithCapacity:0];
     // Create a product request object and initialize it with our product identifiers

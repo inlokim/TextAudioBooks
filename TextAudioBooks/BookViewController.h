@@ -12,7 +12,7 @@
 
 @import AVFoundation;
 
-@interface BookViewController : UITableViewController <NSXMLParserDelegate,  AVAudioPlayerDelegate>
+@interface BookViewController : UITableViewController <AVAudioPlayerDelegate>
 
 @property (strong, nonatomic) AppRecord *appRecord;
 //@property (strong, nonatomic) NSString *fileId;

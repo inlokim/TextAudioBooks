@@ -12,6 +12,7 @@
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
+@property (nonatomic, strong) NSMutableArray *arrFileDownloadData;
 @property (strong, nonatomic) UIWindow *window;
 @property (nonatomic, copy) void(^backgroundTransferCompletionHandler)();
 

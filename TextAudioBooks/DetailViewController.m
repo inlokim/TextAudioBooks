@@ -14,6 +14,7 @@
 #import "MyModel.h"
 #import "StoreManager.h"
 #import "StoreObserver.h"
+#import "MyModel.h"
 
 #define SAMPLE NO
 #define FULL YES
@@ -235,24 +236,30 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 
 - (IBAction)purchaseButtonPressed:(id)sender
 {
-    
     downloadType = FULL;
-    
- //   NSLog(@"##prod id : %@", skProduct.productIdentifier);
- //  [[StoreObserver sharedInstance] buy:skProduct];
-    [self initializeFileDownloadDataArray];
-    [self startDownload];
+    //[self downloadBook];
+    [[StoreObserver sharedInstance] buy:skProduct];
 }
 
 
 #pragma mark - Get Sample
 
-- (IBAction)getSampleButtonPressed:(id)sender {
-    
+- (IBAction)getSampleButtonPressed:(id)sender
+{
     downloadType = SAMPLE;
-    [self initializeFileDownloadDataArray];
-    [self startDownload];
+    [self downloadBook];
 }
+
+-(void)downloadBook
+{
+    [self savePersistence];
+    [self saveSmallCoverImage];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"changeTableData"
+                                                        object:appRecord];
+    [self.tabBarController setSelectedIndex:0];
+}
+
 
 #pragma mark - File Download
 
@@ -319,302 +326,12 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     
     if (![[NSFileManager defaultManager] fileExistsAtPath:imageFile])
     {
-        NSLog(@"[NSFileManager defaultManager");
+        //NSLog(@"[NSFileManager defaultManager");
         //UIImage *img = appRecord.appIcon;
         NSData *dataObj = UIImagePNGRepresentation(imageView.image);
         [dataObj writeToFile:imageFile atomically:YES];
     }
 }
-
-
--(void)initializeFileDownloadDataArray
-{
-    self.arrFileDownloadData = [[NSMutableArray alloc] init];
-
-    if (downloadType == SAMPLE)
-        fileName = [NSString stringWithFormat:@"%@_preview.zip",appRecord.bookId];
-    else if (downloadType == FULL)
-        fileName = [NSString stringWithFormat:@"%@_full.zip",appRecord.bookId];
-    
-    NSLog(@"##downloadType : %d", downloadType);
-    NSLog(@"##fileName : %@", fileName);
-    
-    [self.arrFileDownloadData addObject:[[FileDownloadInfo alloc] initWithFileTitle:appRecord.bookId andDownloadSource:[fileHome stringByAppendingString:fileName]]];
-}
-
--(int)getFileDownloadInfoIndexWithTaskIdentifier:(unsigned long)taskIdentifier
-{
-    int index = 0;
-    for (int i=0; i<[self.arrFileDownloadData count]; i++)
-    {
-        FileDownloadInfo *fdi = [self.arrFileDownloadData objectAtIndex:i];
-        if (fdi.taskIdentifier == taskIdentifier)
-        {
-            index = i;
-            break;
-        }
-    }
-    
-    return index;
-}
-
-- (void) startDownload
-{
-    [self activityIndicatorVisible:YES];
-    //self.navigationController.navigationItem.backBarButtonItem.enabled = NO;
-    self.navigationController.navigationItem.leftBarButtonItem.enabled = NO;
-    
-    NSLog(@"##downloadType : %d", downloadType);
-    //NSLog(@"homeDir : %@", [Utils homeDir]);
-    
-    // Access all FileDownloadInfo objects using a loop.
-    for (int i=0; i<[self.arrFileDownloadData count]; i++)
-    {
-        FileDownloadInfo *fdi = [self.arrFileDownloadData objectAtIndex:i];
-        
-        // Check if a file is already being downloaded or not.
-        if (!fdi.isDownloading)
-        {
-            // Check if should create a new download task using a URL, or using resume data.
-            if (fdi.taskIdentifier == -1)
-            {
-                NSLog(@"taskIdentifier == -1");
-                fdi.downloadTask = [self.session downloadTaskWithURL:[NSURL URLWithString:fdi.downloadSource]];
-            }
-            else
-            {
-                fdi.downloadTask = [self.session downloadTaskWithResumeData:fdi.taskResumeData];
-            }
-            
-            // Keep the new taskIdentifier.
-            fdi.taskIdentifier = fdi.downloadTask.taskIdentifier;
-            
-            // Start the download.
-            [fdi.downloadTask resume];
-            
-            // Indicate for each file that is being downloaded.
-            fdi.isDownloading = YES;
-            
-       }
-    }
-}
-
-#pragma mark - NSURLSession Delegate method implementation
-
--(void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location{
-    
-    NSError *error;
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    
-    NSString *destinationFilename = downloadTask.originalRequest.URL.lastPathComponent;
-    NSURL *destinationURL = [self.docDirectoryURL URLByAppendingPathComponent:destinationFilename];
-    
-    if ([fileManager fileExistsAtPath:[destinationURL path]]) {
-        [fileManager removeItemAtURL:destinationURL error:nil];
-    }
-    
-    BOOL success = [fileManager copyItemAtURL:location
-                                        toURL:destinationURL
-                                        error:&error];
-    
-    if (success)
-    {
-        NSLog(@"download success");
-        
-        // Change the flag values of the respective FileDownloadInfo object.
-        int index = [self getFileDownloadInfoIndexWithTaskIdentifier:downloadTask.taskIdentifier];
-        FileDownloadInfo *fdi = [self.arrFileDownloadData objectAtIndex:index];
-        
-        fdi.isDownloading = NO;
-        fdi.downloadComplete = YES;
-        
-        // Set the initial value to the taskIdentifier property of the fdi object,
-        // so when the start button gets tapped again to start over the file download.
-        fdi.taskIdentifier = -1;
-        
-        // In case there is any resume data stored in the fdi object, just make it nil.
-        fdi.taskResumeData = nil;
-        
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            // Reload the respective table view row using the main thread.
-            //  [self.tblFiles reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]]
-            //                       withRowAnimation:UITableViewRowAnimationNone];
-            
-        }];
-        
-        fdi.downloadProgress = 0.0;
-        
-        
-    }
-    else{
-        NSLog(@"Unable to copy temp file. Error: %@", [error localizedDescription]);
-    }
-}
-
-
--(void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error
-{
-    NSLog(@"URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError");
-    
-    if (error != nil)
-    {
-        NSLog(@"Download completed with error: %@", [error localizedDescription]);
-    }
-    else
-    {
-       /* UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Hello!"
-                                                        message:@"Hello!" delegate:self
-                                              cancelButtonTitle:@"Done"
-                                              otherButtonTitles:nil];
-        [alert performSelectorOnMainThread:@selector(show)
-                                withObject:nil
-                             waitUntilDone:NO];*/
-        [self unZipping];
-        [self deleteFile];
-        [self savePersistence];
-        [self saveSmallCoverImage];
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"changeTableData"
-                                                            object:self];
-        
-        NSLog(@"Download finished successfully.");
-        
-        [self activityIndicatorVisible:NO];
-        
-        //self.navigationController.navigationItem.backBarButtonItem.enabled = YES;
-        
-        self.navigationController.navigationItem.leftBarButtonItem.enabled = YES;
-        
-        [self.tabBarController setSelectedIndex:0];
-        
-       // [alert dismissWithClickedButtonIndex:0 animated:YES];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self viewDidLoad];
-            [self viewWillAppear:YES];
-        });
-        
-        
-  /*      // Cancel the task.
-        [fdi.downloadTask cancel];
-        
-        // Change all related properties.
-        fdi.isDownloading = NO;
-        fdi.taskIdentifier = -1;
-        fdi.downloadProgress = 0.0;*/
-
-        
-
-    }
-}
-
-- (void)unZipping {
-    
-    NSString *filePath = [NSString stringWithFormat:@"%@/%@",[Utils homeDir],fileName];
-    NSString *zipPath = filePath;
-    
-    [SSZipArchive unzipFileAtPath:zipPath toDestination:[Utils homeDir]];
-}
-
-- (void)deleteFile {
-    
-    NSLog(@"Delete Zip Files");
-    
-    NSString *zipFile = [NSString stringWithFormat:@"%@/%@",[Utils homeDir],fileName];
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    [fileManager removeItemAtPath:zipFile error:NULL];
-    
-    if (downloadType == FULL)
-    {
-        NSString *prevFile = [NSString stringWithFormat:@"%@/%@_preview",[Utils homeDir],appRecord.bookId];
-        fileManager = [NSFileManager defaultManager];
-        [fileManager removeItemAtPath:prevFile error:NULL];
-    }
-}
-
-
--(void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite{
-    
-    if (totalBytesExpectedToWrite == NSURLSessionTransferSizeUnknown) {
-        NSLog(@"Unknown transfer size");
-    }
-    else
-    {
-        // Locate the FileDownloadInfo object among all based on the taskIdentifier property of the task.
-        int index = [self getFileDownloadInfoIndexWithTaskIdentifier:downloadTask.taskIdentifier];
-        FileDownloadInfo *fdi = [self.arrFileDownloadData objectAtIndex:index];
-        
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{    
-            // Calculate the progress.
-            fdi.downloadProgress = (double)totalBytesWritten / (double)totalBytesExpectedToWrite;
-            
-            // Get the progress view of the appropriate cell and update its progress.
-            //            UITableViewCell *cell = [self.tblFiles cellForRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]];
-            //            UIProgressView *progressView = (UIProgressView *)[cell viewWithTag:CellProgressBarTagValue];
-           
-            if (downloadType == SAMPLE)
-            {
-                [sampleButton setHidden:YES];
-                
-                [getSampleProgressView setHidden:NO];
-                [getSampleProgressLabel setHidden:NO];
-              
-                getSampleProgressView.progress = fdi.downloadProgress;
-            
-                double value = (double)totalBytesWritten / (double)totalBytesExpectedToWrite * 100;
-                getSampleProgressLabel.text = [NSString stringWithFormat:@"%.1f %%", value];
-            }
-            else if (downloadType == FULL)
-            {
-                [purchaseButton setHidden:YES];
-                [sampleButton setHidden:YES];
-                
-                [purchaseProgressView setHidden:NO];
-                [purchaseProgressLabel setHidden:NO];
-                
-                purchaseProgressView.progress = fdi.downloadProgress;
-                
-                double value = (double)totalBytesWritten / (double)totalBytesExpectedToWrite * 100;
-                purchaseProgressLabel.text = [NSString stringWithFormat:@"%.1f %%", value];
-            }
-        }];
-    }
-}
-
-
--(void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session
-{
-    NSLog(@"URLSessionDidFinishEventsForBackgroundURLSession");
-    
-    AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
-    
-    // Check if all download tasks have been finished.
-    [self.session getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
-        
-        if ([downloadTasks count] == 0)
-        {
-            if (appDelegate.backgroundTransferCompletionHandler != nil) {
-                // Copy locally the completion handler.
-                void(^completionHandler)() = appDelegate.backgroundTransferCompletionHandler;
-                
-                // Make nil the backgroundTransferCompletionHandler.
-                appDelegate.backgroundTransferCompletionHandler = nil;
-                
-                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                    // Call the completion handler to tell the system that there are no other background transfers.
-                    completionHandler();
-                    
-                    // Show a local notification when all downloads are over.
-                    UILocalNotification *localNotification = [[UILocalNotification alloc] init];
-                    localNotification.alertBody = @"All files have been downloaded!";
-                    [[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
-                }];
-            }
-        }
-    }];
-}
-
-
 
 #pragma mark Handle purchase request notification
 
@@ -633,7 +350,7 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
         case IAPPurchaseSucceeded:
         {
             NSLog(@"IAPPurchaseSucceeded !!!");
-            [self startDownload];
+            [self downloadBook];
         }
             break;
         case IAPPurchaseFailed:
@@ -644,11 +361,8 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
             // Switch to the iOSPurchasesList view controller when receiving a successful restore notification
         case IAPRestoredSucceeded:
         {
-            
             NSLog(@"IAPRestoredSucceeded");
-            
-            [self startDownload];
-            
+            [self downloadBook];
         }
             break;
         case IAPRestoredFailed:
