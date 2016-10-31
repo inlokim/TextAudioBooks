@@ -400,11 +400,11 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
                 
                 if ([aProduct.productIdentifier isEqualToString:productId])
                 {
-                    NSString *titleName = aProduct.localizedTitle;
+                    //NSString *titleName = aProduct.localizedTitle;
                     
                     price = [NSString stringWithFormat:@"%@ %@",[aProduct.priceLocale objectForKey:NSLocaleCurrencySymbol],aProduct.price];
                     
-                    NSLog(@"title : %@", titleName);
+                    //NSLog(@"title : %@", titleName);
                     NSLog(@"price : %@", price);
                     NSLog(@"prod id : %@", aProduct.productIdentifier);
                     
