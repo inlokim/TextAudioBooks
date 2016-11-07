@@ -262,9 +262,9 @@ static NSString *const latestList = @"http://inlokim.com/textAudioBooks/list.php
                                                   object:[StoreManager sharedInstance]];
     
     // Unregister for StoreObserver's notifications
-    [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:IAPPurchaseNotification
-                                                  object:[StoreObserver sharedInstance]];
+    //[[NSNotificationCenter defaultCenter] removeObserver:self
+   //                                                 name:IAPPurchaseNotification
+   //                                               object:[StoreObserver sharedInstance]];
 }
 
 

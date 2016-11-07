@@ -175,12 +175,12 @@ static NSString *cellIdentifier = @"MyCell";
             {
                 Script * aScript = [[Script alloc] init];
                 aScript.startTime = [TBXML valueOfAttributeNamed:@"START" forElement:sync];
-                NSLog(@"startTime=%@",aScript.startTime);
+                //NSLog(@"startTime=%@",aScript.startTime);
                 
                 
                 TBXMLElement * desc = [TBXML childElementNamed:@"DESC" parentElement:sync];
                 aScript.description = [TBXML textForElement:desc];
-                NSLog(@"description=%@",aScript.description);
+               // NSLog(@"description=%@",aScript.description);
                 
                 [arrNeighboursData addObject:aScript];
                 
@@ -564,7 +564,7 @@ static NSString *cellIdentifier = @"MyCell";
 {
     [self.navigationController setNavigationBarHidden:YES animated:YES];
     
-    NSLog(@"wwcurrentTime=%f",p.currentTime);
+    //NSLog(@"wwcurrentTime=%f",p.currentTime);
     
     [p play];
     

@@ -10,7 +10,7 @@
 #import <StoreKit/StoreKit.h>
 #import "AppRecord.h"
 
-@interface DetailViewController : UIViewController <NSURLSessionDelegate>
+@interface DetailViewController : UIViewController <NSURLSessionDelegate, UIAlertViewDelegate>
 
 
 @property (strong, nonatomic) AppRecord *appRecord;

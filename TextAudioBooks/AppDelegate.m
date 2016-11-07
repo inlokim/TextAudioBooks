@@ -10,17 +10,17 @@
 #import "AppDelegate.h"
 #import "StoreObserver.h"
 
+@import AFNetworking;
+
 @implementation AppDelegate
 
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
     
     // Attach an observer to the payment queue
     [[SKPaymentQueue defaultQueue] addTransactionObserver:[StoreObserver sharedInstance]];
-    
-    // NSLog(@"test1");
-    self.arrFileDownloadData = [[NSMutableArray alloc] init];
+
     
     return YES;
 }

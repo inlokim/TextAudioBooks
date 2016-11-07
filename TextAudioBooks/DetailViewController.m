@@ -105,7 +105,7 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     
     NSURLSessionConfiguration *sessionConfiguration
     = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:sessionId];
-    sessionConfiguration.HTTPMaximumConnectionsPerHost = 5;
+    sessionConfiguration.HTTPMaximumConnectionsPerHost = 1;
     
     self.session = [NSURLSession sessionWithConfiguration:sessionConfiguration
                                                  delegate:self
@@ -236,7 +236,7 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 
 - (IBAction)purchaseButtonPressed:(id)sender
 {
-    downloadType = FULL;
+    appRecord.bookType = @"2";
     //[self downloadBook];
     [[StoreObserver sharedInstance] buy:skProduct];
 }
@@ -246,20 +246,54 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 
 - (IBAction)getSampleButtonPressed:(id)sender
 {
-    downloadType = SAMPLE;
+    appRecord.bookType = @"1";
     [self downloadBook];
+}
+
+-(void)sucessPurchaseMessage
+{
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:nil
+                                                    message:@"Thank you for your purchase."
+                                                   delegate:self
+                                          cancelButtonTitle:@"OK"
+                                          otherButtonTitles:nil];
+    [alert show];
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    // the user clicked OK
+    if (buttonIndex == 0) {
+        [self downloadBook];
+    }
 }
 
 -(void)downloadBook
 {
-    [self savePersistence];
-    [self saveSmallCoverImage];
+   // [self savePersistence];
+   // [self saveSmallCoverImage];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:@"changeTableData"
                                                         object:appRecord];
     [self.tabBarController setSelectedIndex:0];
 }
 
+#pragma mark Display message
+
+-(void)alertWithTitle:(NSString *)title message:(NSString *)message
+{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
+                                                                   message:message
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *defaultAction = [UIAlertAction actionWithTitle:@"OK"
+                                                            style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * action) {}];
+    
+    [alert addAction:defaultAction];
+    
+    [self presentViewController:alert animated:YES completion:nil];
+}
 
 #pragma mark - File Download
 
@@ -287,7 +321,7 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
         NSString *mybookId = [chunks objectAtIndex:0];
         NSString *mybookType = [chunks objectAtIndex:3];
         
-        NSLog(@"bookId : %@   bookType : %@ ",mybookId, mybookType);
+        //NSLog(@"bookId : %@   bookType : %@ ",mybookId, mybookType);
         
         if ([mybookId isEqualToString:appRecord.bookId] &&
             [mybookType isEqualToString:@"1"]) //sample
@@ -346,30 +380,31 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     
     switch (status)
     {
-            
         case IAPPurchaseSucceeded:
         {
-            NSLog(@"IAPPurchaseSucceeded !!!");
-            [self downloadBook];
+            NSLog(@"##IAPPurchaseSucceeded !!!");
+            [self sucessPurchaseMessage];
         }
             break;
         case IAPPurchaseFailed:
         {
-            [self alertWithTitle:@"Purchase Status" message:purchasesNotification.message];
+           // [self alertWithTitle:@"Purchase Status" message:purchasesNotification.message];
         }
             break;
             // Switch to the iOSPurchasesList view controller when receiving a successful restore notification
         case IAPRestoredSucceeded:
         {
-            NSLog(@"IAPRestoredSucceeded");
-            [self downloadBook];
+            NSLog(@"##IAPRestoredSucceeded");
+            [self sucessPurchaseMessage];
+            
+            
         }
             break;
         case IAPRestoredFailed:
         {
             NSLog(@"IAPRestoredFailed");
             
-            [self alertWithTitle:@"Purchase Status" message:purchasesNotification.message];
+           // [self alertWithTitle:@"Purchase Status" message:purchasesNotification.message];
         }
             break;
             // Notify the user that downloading is about to start when receiving a download started notification
@@ -409,21 +444,13 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     }
 }
 
-#pragma mark Display message
-
--(void)alertWithTitle:(NSString *)title message:(NSString *)message
+- (void)dealloc
 {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
-                                                                   message:message
-                                                            preferredStyle:UIAlertControllerStyleAlert];
-    
-    UIAlertAction *defaultAction = [UIAlertAction actionWithTitle:@"OK"
-                                                            style:UIAlertActionStyleDefault
-                                                          handler:^(UIAlertAction * action) {}];
-    
-    [alert addAction:defaultAction];
-    
-    [self presentViewController:alert animated:YES completion:nil];
+   
+    // Unregister for StoreObserver's notifications
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:IAPPurchaseNotification
+                                                  object:[StoreObserver sharedInstance]];
 }
 
 

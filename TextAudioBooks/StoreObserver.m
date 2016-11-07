@@ -258,6 +258,8 @@ NSString * const IAPPurchaseNotification = @"IAPPurchaseNotification";
 // IAPDownloadStarted. Finish all transactions, otherwise.
 -(void)completeTransaction:(SKPaymentTransaction *)transaction forStatus:(NSInteger)status
 {
+    NSLog(@"completeTransaction");
+    
     self.status = status;
     //Do not send any notifications when the user cancels the purchase
     if (transaction.error.code != SKErrorPaymentCancelled)
