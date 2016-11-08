@@ -60,6 +60,9 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 
 
 - (void)viewDidLoad {
+    
+    NSLog(@"viewDidLoad");
+    
     [super viewDidLoad];
     
     self.title = appRecord.title;
@@ -113,6 +116,9 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
     
     
     //purchase
+    
+    // Attach an observer to the payment queue
+    //[[SKPaymentQueue defaultQueue] addTransactionObserver:[StoreObserver sharedInstance]];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handlePurchasesNotification:)
@@ -237,6 +243,8 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 - (IBAction)purchaseButtonPressed:(id)sender
 {
     appRecord.bookType = @"2";
+    downloadType = FULL;
+    
     //[self downloadBook];
     [[StoreObserver sharedInstance] buy:skProduct];
 }
@@ -247,6 +255,8 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 - (IBAction)getSampleButtonPressed:(id)sender
 {
     appRecord.bookType = @"1";
+    downloadType = SAMPLE;
+    
     [self downloadBook];
 }
 
@@ -270,12 +280,13 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 
 -(void)downloadBook
 {
-   // [self savePersistence];
-   // [self saveSmallCoverImage];
+//    [self savePersistence];
+//    [self saveSmallCoverImage];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:@"changeTableData"
                                                         object:appRecord];
     [self.tabBarController setSelectedIndex:0];
+
 }
 
 #pragma mark Display message
@@ -397,7 +408,6 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
             NSLog(@"##IAPRestoredSucceeded");
             [self sucessPurchaseMessage];
             
-            
         }
             break;
         case IAPRestoredFailed:
@@ -452,6 +462,7 @@ static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
                                                     name:IAPPurchaseNotification
                                                   object:[StoreObserver sharedInstance]];
 }
+
 
 
 @end

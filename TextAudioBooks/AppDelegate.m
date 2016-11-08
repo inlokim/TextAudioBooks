@@ -9,6 +9,7 @@
 
 #import "AppDelegate.h"
 #import "StoreObserver.h"
+#import "BackgroundSessionManager.h"
 
 @import AFNetworking;
 
@@ -17,10 +18,14 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    self.downloadCompleted = YES;
     
     // Attach an observer to the payment queue
     [[SKPaymentQueue defaultQueue] addTransactionObserver:[StoreObserver sharedInstance]];
-
+    
+    // NSLog(@"test1");
+    self.arrFileDownloadData = [[NSMutableArray alloc] init];
+    
     
     return YES;
 }
@@ -29,6 +34,10 @@
     
     self.backgroundTransferCompletionHandler = completionHandler;
     
+    
+   // NSAssert([[BackgroundSessionManager sharedManager].session.configuration.identifier isEqualToString:identifier], @"Identifiers didn't match");
+   // [BackgroundSessionManager sharedManager].savedCompletionHandler = completionHandler;
+
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {

@@ -257,7 +257,7 @@ static NSString *cellIdentifier = @"MyCell";
     
     [self getPersistData];
     NSLog(@"ContentsViewController viewWillAppear ");
-    NSLog(@"currentRow :%d", currentRow);
+   // NSLog(@"currentRow :%d", currentRow);
     
     /******
      ROW

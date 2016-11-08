@@ -1,22 +1,3 @@
-/*
- Copyright (C) 2015 Apple Inc. All Rights Reserved.
- See LICENSE.txt for this sample’s licensing information
- 
- Abstract:
- Controller for the main table view of the LazyTable sample.
- This table view controller works off the AppDelege's data model.
- produce a three-stage lazy load:
- 1. No data (i.e. an empty table)
- 2. Text-only data from the model's RSS feed
- 3. Images loaded over the network asynchronously
- 
- This process allows for asynchronous loading of the table to keep the UI responsive.
- Stage 3 is managed by the AppRecord corresponding to each row/cell.
- 
- Images are scaled to the desired height.
- If rapid scrolling is in progress, downloads do not begin until scrolling has ended.
- */
-
 #import "MyBooksListViewController.h"
 #import "Utils.h"
 #import "AppRecord.h"
@@ -34,9 +15,6 @@
 #define FULL YES
 #define CellProgressBarTagValue         40
 #define MYBOOKS_PLIST  @"myBooks.plist"
-
-
-@import AFNetworking;
 
 static NSString *fileHome = @"http://inlokim.com/textAudioBooks/files/";
 
@@ -74,40 +52,35 @@ static NSString *CellIdentifier = @"MyBooksCell";
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    downloadCompleted = YES;
-       // [self.tableView registerClass:[StoreCell class] forCellReuseIdentifier:CellIdentifier];
+    //downloadCompleted = YES;
+    // [self.tableView registerClass:[StoreCell class] forCellReuseIdentifier:CellIdentifier];
     
     [self getPersistence];
     
     //NSLog(@"entries count : %d", (int)entries.count);
     
-    [self.tableView reloadData];
+    //[self.tableView reloadData];
     
     //after auto tab bar changed
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didChangeTableData:)
                                                  name:@"changeTableData" object:nil];
     
+    //download
     
-    //price
-   // self.products = [[NSMutableArray alloc] initWithCapacity:0];
-        //download
+    app = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    //Download
     
-    //app = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-
- /*   self.arrFileDownloadData = [[NSMutableArray alloc] init];
-    
+    //[self initializeFileDownloadDataArray];
     
     NSArray *URLs = [[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask];
     self.docDirectoryURL = [URLs objectAtIndex:0];
     
     //NSLog(@"docDirectoryURL : %@",[self.docDirectoryURL path] );
+    
+    u_int32_t value = arc4random();
 
-    //u_int32_t value = arc4random();
-  
-  */
- /*   int value = 0;
-    NSString *sessionId = [NSString stringWithFormat:@"kr.co.highwill.TextAudioBooks_%d",value];
+    NSString *sessionId = [NSString stringWithFormat:@"kr.co.highwill.TextAudioBooks_%d", value];
     
     //NSLog(@"session id = %@", sessionId);
     
@@ -117,17 +90,21 @@ static NSString *CellIdentifier = @"MyBooksCell";
     
     self.session = [NSURLSession sessionWithConfiguration:sessionConfiguration
                                                  delegate:self
-                                            delegateQueue:[NSOperationQueue mainQueue]];*/
+                                            delegateQueue:nil];
+    
+    NSLog(@"app.downloadCompleted : %d", app.downloadCompleted);
+    
 }
 
 - (void)didChangeTableData:(NSNotification *)notification
 {
-    NSLog(@"didChangeTableData");
+    [self viewDidLoad];
+    [self viewWillAppear:YES];
     
     if ([notification.object isKindOfClass:[AppRecord class]])
     {
         aBook = [notification object];
-
+        
         if ([aBook.bookType isEqualToString:@"1"]) downloadType = SAMPLE;
         else if ([aBook.bookType isEqualToString:@"2"]) downloadType = FULL;
         
@@ -155,13 +132,13 @@ static NSString *CellIdentifier = @"MyBooksCell";
     [super didReceiveMemoryWarning];
 }
 /*
-- (void)viewWillAppear:(BOOL)animated
-{
-    //NSLog(@"viewWillAppear");
-    
-    [self.tableView reloadData];
-}
-*/
+ - (void)viewWillAppear:(BOOL)animated
+ {
+ //NSLog(@"viewWillAppear");
+ 
+ [self.tableView reloadData];
+ }
+ */
 
 #pragma mark - Persistence
 
@@ -169,7 +146,7 @@ static NSString *CellIdentifier = @"MyBooksCell";
 {
     NSString *filePath =
     [[Utils homeDir] stringByAppendingPathComponent:MYBOOKS_PLIST];
-
+    
     NSMutableArray *myBooks = [[NSMutableArray alloc] initWithCapacity:10];
     /*
      myBooks.plist 구조
@@ -187,149 +164,57 @@ static NSString *CellIdentifier = @"MyBooksCell";
         NSArray *array = [[NSArray alloc] initWithContentsOfFile:filePath];
         //NSLog(@"array count = %d",(int)[array count]);
         
-
-            // for (int i=0; i < [array count] ; i ++)
-            for (int i=(int)[array count]-1 ; i >= 0 ; i --)
-            {
-                //역순으로 넣기
-                NSString *string = [array objectAtIndex:i];
-                NSArray *chunks = [string componentsSeparatedByString: @":"];
-                
-                AppRecord  *appRecord =[[AppRecord alloc]init];
-                appRecord.bookId = [chunks objectAtIndex:0];
-                ////NSLog(@"aBook.bookId=%@",appRecord.bookId);
-                
-                ////NSLog(@"chunks2 : %@ ",[chunks objectAtIndex:2]);
-                ////NSLog(@"chunks3 : %@ ",[chunks objectAtIndex:3]);
-                ////NSLog(@"chunks4 : %@ ",[chunks objectAtIndex:4]);
-                
-                ////NSLog(@"chunks count : %d", (int)chunks.count);
-                
-                if (chunks.count > 1)
-                {
-                    appRecord.title = [chunks objectAtIndex:1];
-                    ////NSLog(@"title : %@ ",[chunks objectAtIndex:1]);
-                }
-                
-                if (chunks.count > 2)
-                {
-                    appRecord.author = [chunks objectAtIndex:2];
-                    ////NSLog(@"author : %@ ",[chunks objectAtIndex:2]);
-                }
-                
-                if (chunks.count > 3)
-                {
-                    appRecord.bookType = [chunks objectAtIndex:3];
-                    ////NSLog(@"bookType : %@ ",[chunks objectAtIndex:3]);
-                }
-                
-                [myBooks addObject:appRecord];
-                
-                /******************************
-                 GET Local Image
-                 ******************************/
-                appRecord.localImageURL =
-                [NSString stringWithFormat:@"%@/%@_cover.png", [Utils homeDir], appRecord.bookId];
-                //////NSLog(@"aBook.localImageURL=%@",appRecord.localImageURL);
-            }
-            entries = myBooks;
         
-        //같은 객체이면 날린다.
-        for(NSInteger i = 0; i < [entries count]; i++)
+        // for (int i=0; i < [array count] ; i ++)
+        for (int i=(int)[array count]-1 ; i >= 0 ; i --)
         {
-            for(NSInteger j = 0; j < [entries count]; j++)
-            {
-                if ( i == j) {
-                    // No need to check if its the same object.
-                    continue;
-                }
-                
-                AppRecord *book1 = [entries objectAtIndex:i];
-                AppRecord *book2 = [entries objectAtIndex:j];
-                
-                
-                //같은 Book id가 여러개 존재하면 하나만 보이게 한다.
-                if ([book1.bookId isEqualToString:book2.bookId])
-                {
-                    [entries removeObjectAtIndex:i];
-                } 
-            }
-        }
-     }
-}
-
-
--(void) savePersistence
-{
-    NSLog(@"START ************   savePersistence  *****************");
-    NSMutableArray *array = nil;
-    NSString *homeDir = [Utils homeDir];
-    NSString *plist = [homeDir stringByAppendingPathComponent:MYBOOKS_PLIST];
-    
-    //myBooks.plist로부터 데이터를 가져온다.
-    if ([[NSFileManager defaultManager] fileExistsAtPath:plist])
-        array = [[NSMutableArray alloc] initWithContentsOfFile:plist];
-    else
-        array = [[NSMutableArray alloc] init];
-    
-    NSLog(@"array count = %d",(int)[array count]);
-    
-    //myBooks.plist안에 샘플 정보가 있다면 삭제한다.
-    for (int i=0; i < [array count] ; i ++)
-    {
-        NSString *string = [array objectAtIndex:i];
-        NSArray *chunks = [string componentsSeparatedByString: @":"];
-        
-        NSString *mybookId = [chunks objectAtIndex:0];
-        NSString *mybookType = [chunks objectAtIndex:3];
-        
-        //NSLog(@"bookId : %@   bookType : %@ ",mybookId, mybookType);
-        
-        if ([mybookId isEqualToString:aBook.bookId] &&
-            [mybookType isEqualToString:@"1"]) //sample
-        {
-            NSLog(@"appRecord.bookId : %@   mybookId : %@ mybookType :%@",aBook.bookId, mybookId, mybookType);
+            //역순으로 넣기
+            NSString *string = [array objectAtIndex:i];
+            NSArray *chunks = [string componentsSeparatedByString: @":"];
             
-            [array removeObjectAtIndex:i];
+            AppRecord  *appRecord =[[AppRecord alloc]init];
+            appRecord.bookId = [chunks objectAtIndex:0];
+            ////NSLog(@"aBook.bookId=%@",appRecord.bookId);
+            
+            ////NSLog(@"chunks2 : %@ ",[chunks objectAtIndex:2]);
+            ////NSLog(@"chunks3 : %@ ",[chunks objectAtIndex:3]);
+            ////NSLog(@"chunks4 : %@ ",[chunks objectAtIndex:4]);
+            
+            ////NSLog(@"chunks count : %d", (int)chunks.count);
+            
+            if (chunks.count > 1)
+            {
+                appRecord.title = [chunks objectAtIndex:1];
+                ////NSLog(@"title : %@ ",[chunks objectAtIndex:1]);
+            }
+            
+            if (chunks.count > 2)
+            {
+                appRecord.author = [chunks objectAtIndex:2];
+                ////NSLog(@"author : %@ ",[chunks objectAtIndex:2]);
+            }
+            
+            if (chunks.count > 3)
+            {
+                appRecord.bookType = [chunks objectAtIndex:3];
+                ////NSLog(@"bookType : %@ ",[chunks objectAtIndex:3]);
+            }
+            
+            [myBooks addObject:appRecord];
+            
+            /******************************
+             GET Local Image
+             ******************************/
+            appRecord.localImageURL =
+            [NSString stringWithFormat:@"%@/%@_cover.png", [Utils homeDir], appRecord.bookId];
+            //////NSLog(@"aBook.localImageURL=%@",appRecord.localImageURL);
         }
-    }
-    
-    //BookType sample=1, buy=2
-   // if (downloadType == SAMPLE) aBook.bookType = @"1";
-   // else if (downloadType == FULL) aBook.bookType = @"2";
-    
-    //download = 1, complete = 2
-    
-    [array addObject:
-     [NSString stringWithFormat:@"%@:%@:%@:%@",aBook.bookId, aBook.title, aBook.author, aBook.bookType]];
-    
-    [array writeToFile:plist atomically:YES];
-    
-    NSLog(@"END ************   savePersistence  *****************");
-}
-
-// -------------------------------------------------------------------------------
-//	image를 파일로 저장
-// -------------------------------------------------------------------------------
-
--(void)saveSmallCoverImage
-{
-    NSLog(@"saveSmallCoverImage");
-    //NSString *homeDir = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"];
-    NSString *homeDir = [Utils homeDir];
-    NSString *imageFile = [NSString stringWithFormat:@"%@/%@_cover.png", homeDir,aBook.bookId];
-    NSLog(@"imageFile=%@",imageFile);
-    
-    if (![[NSFileManager defaultManager] fileExistsAtPath:imageFile])
-    {
-        //NSLog(@"[NSFileManager defaultManager");
-        //UIImage *img = appRecord.appIcon;
-        NSData *dataObj = UIImagePNGRepresentation(aBook.appIcon);
-        [dataObj writeToFile:imageFile atomically:YES];
+        entries = myBooks;
+        
     }
 }
 
-
+/*
 -(void)emptySandbox
 {
     NSFileManager *fileMgr = [[NSFileManager alloc] init];
@@ -355,7 +240,7 @@ static NSString *CellIdentifier = @"MyBooksCell";
         }
     }
 }
-
+*/
 
 #pragma mark - UITableViewDataSource
 
@@ -383,8 +268,8 @@ static NSString *CellIdentifier = @"MyBooksCell";
     // Set up the cell representing the app
     AppRecord * appRecord = [entries objectAtIndex:indexPath.row];
     
-   // //NSLog(@"appRecord title : %@", appRecord.title);
-   // //NSLog(@"indexPath row : %d", (int)indexPath.row);
+    // //NSLog(@"appRecord title : %@", appRecord.title);
+    // //NSLog(@"indexPath row : %d", (int)indexPath.row);
     
     [cell.imageView.layer setBorderColor: [[UIColor lightGrayColor] CGColor]];
     [cell.imageView.layer setBorderWidth: 1.0];
@@ -430,11 +315,11 @@ static NSString *CellIdentifier = @"MyBooksCell";
 // Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-   
+    
     NSString *filePath =
     [[Utils homeDir] stringByAppendingPathComponent:MYBOOKS_PLIST];
     NSMutableArray *array = [[NSMutableArray alloc] initWithContentsOfFile:filePath];
-
+    
     AppRecord * appRecord = [entries objectAtIndex:indexPath.row];
     
     if (editingStyle == UITableViewCellEditingStyleDelete)
@@ -442,7 +327,7 @@ static NSString *CellIdentifier = @"MyBooksCell";
         /*********************************
          My Books - MyBooks.plist 수정
          **********************************/
-
+        
         //NSLog(@"array count = %d",(int)[array count]);
         
         for (int i=0; i < [array count] ; i ++)
@@ -450,7 +335,7 @@ static NSString *CellIdentifier = @"MyBooksCell";
             NSString *string = [array objectAtIndex:i];
             NSArray *chunks = [string componentsSeparatedByString: @":"];
             
-
+            
             NSString *myBookId = [chunks objectAtIndex:0];
             
             if ([myBookId isEqual:appRecord.bookId]){
@@ -476,8 +361,8 @@ static NSString *CellIdentifier = @"MyBooksCell";
         NSString *imageFile = [NSString stringWithFormat:@"%@/%@_cover.png", [Utils homeDir], appRecord.bookId];
         NSString *macFile = [NSString stringWithFormat:@"%@/_MACOSX", [Utils homeDir]];
         //NSString *zipFile = [NSString stringWithFormat:@"%@/%@%@", [Utils homeDir], appRecord.bookId,flag];
-
-       // NSString *plistFile = [NSString stringWithFormat:@"%@/%@.plist", [Utils homeDir], fileName];
+        
+        // NSString *plistFile = [NSString stringWithFormat:@"%@/%@.plist", [Utils homeDir], fileName];
         //NSLog(@"fileName : %@", fileName);
         
         NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -486,14 +371,14 @@ static NSString *CellIdentifier = @"MyBooksCell";
         [fileManager removeItemAtPath:macFile error:NULL];
         //[fileManager removeItemAtPath:zipFile error:NULL];
         
-       // [fileManager removeItemAtPath:plistFile error:NULL];
+        // [fileManager removeItemAtPath:plistFile error:NULL];
         
         // Delete the row from the data source.
         [entries removeObjectAtIndex:indexPath.row];
         [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
         
         
-        if (entries.count == 0) [self emptySandbox];
+        //if (entries.count == 0) [self emptySandbox];
     }
     // else if (editingStyle == UITableViewCellEditingStyleInsert) {
     // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
@@ -503,19 +388,18 @@ static NSString *CellIdentifier = @"MyBooksCell";
 
 
 /*- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    //NSLog(@"didSelectRowAtIndexPath");
+ {
+ //NSLog(@"didSelectRowAtIndexPath");
  
-   // self.someProperty = [self.someArray objectAtIndex:indexPath.row];
-        MyBooksCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
-    
-    if ([cell.progressLabel.text isEqualToString:@"100.0"])
-    {
-        [self performSegueWithIdentifier:@"showDetail" sender:self];
-    }
-}
-
-*/
+ // self.someProperty = [self.someArray objectAtIndex:indexPath.row];
+ MyBooksCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+ 
+ if ([cell.progressLabel.text isEqualToString:@"100.0"])
+ {
+ [self performSegueWithIdentifier:@"showDetail" sender:self];
+ }
+ }
+ */
 
 
 #pragma mark - Segues
@@ -539,23 +423,92 @@ static NSString *CellIdentifier = @"MyBooksCell";
     }
 }
 
-/*
--(BOOL)shouldPerformSegueWithIdentifier:(NSString *)identifier sender:(id)sender
+-(void) savePersistence
 {
-    downloadCompleted = NO;
-    NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-    NSLog(@"indexPath.row : %ld", (long)indexPath.row);
-    if ([self.arrFileDownloadData count] > 0)
+    NSLog(@"START ************   savePersistence  *****************");
+    NSMutableArray *array = nil;
+    NSString *homeDir = [Utils homeDir];
+    NSString *plist = [homeDir stringByAppendingPathComponent:MYBOOKS_PLIST];
+    
+    //myBooks.plist로부터 데이터를 가져온다.
+    if ([[NSFileManager defaultManager] fileExistsAtPath:plist])
+        array = [[NSMutableArray alloc] initWithContentsOfFile:plist];
+    else
+        array = [[NSMutableArray alloc] init];
+    
+    NSLog(@"array count = %d",(int)[array count]);
+    
+    //myBooks.plist안에 샘플 정보가 있다면 삭제한다.
+    for (int i=0; i < [array count] ; i ++)
     {
+        NSString *string = [array objectAtIndex:i];
+        NSArray *chunks = [string componentsSeparatedByString: @":"];
         
-        FileDownloadInfo *fdi = [self.arrFileDownloadData objectAtIndex:indexPath.row];
+        NSString *mybookId = [chunks objectAtIndex:0];
+        NSString *mybookType = [chunks objectAtIndex:3];
         
-        if (fdi.isDownloading == YES) downloadCompleted = NO;
-        else downloadCompleted = YES;
+        //NSLog(@"bookId : %@   bookType : %@ ",mybookId, mybookType);
+        
+        if ([mybookId isEqualToString:aBook.bookId] &&
+            [mybookType isEqualToString:@"1"]) //sample
+        {
+            NSLog(@"appRecord.bookId : %@   mybookId : %@ mybookType :%@",aBook.bookId, mybookId, mybookType);
+            
+            [array removeObjectAtIndex:i];
+        }
     }
-    //다운로드 된 이후에 segue가 작동한다.
-    return downloadCompleted;
+    
+    //BookType sample=1, buy=2
+    // if (downloadType == SAMPLE) aBook.bookType = @"1";
+    // else if (downloadType == FULL) aBook.bookType = @"2";
+    
+    //download = 1, complete = 2
+    
+    [array addObject:
+     [NSString stringWithFormat:@"%@:%@:%@:%@",aBook.bookId, aBook.title, aBook.author, aBook.bookType]];
+    
+    [array writeToFile:plist atomically:YES];
+    
+    NSLog(@"END ************   savePersistence  *****************");
 }
+
+// -------------------------------------------------------------------------------
+//	image를 파일로 저장
+// -------------------------------------------------------------------------------
+
+-(void)saveSmallCoverImage
+{
+    NSLog(@"saveSmallCoverImage");
+    //NSString *homeDir = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"];
+    NSString *homeDir = [Utils homeDir];
+    NSString *imageFile = [NSString stringWithFormat:@"%@/%@_cover.png", homeDir,aBook.bookId];
+    NSLog(@"imageFile=%@",imageFile);
+    
+    if (![[NSFileManager defaultManager] fileExistsAtPath:imageFile])
+    {
+        //NSLog(@"[NSFileManager defaultManager");
+        //UIImage *img = appRecord.appIcon;
+        NSData *dataObj = UIImagePNGRepresentation(aBook.appIcon);
+        [dataObj writeToFile:imageFile atomically:YES];
+    }
+}
+/*
+ -(BOOL)shouldPerformSegueWithIdentifier:(NSString *)identifier sender:(id)sender
+ {
+ downloadCompleted = NO;
+ NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+ NSLog(@"indexPath.row : %ld", (long)indexPath.row);
+ if ([app.arrFileDownloadData count] > 0)
+ {
+ 
+ FileDownloadInfo *fdi = [app.arrFileDownloadData objectAtIndex:indexPath.row];
+ 
+ if (fdi.isDownloading == YES) downloadCompleted = NO;
+ else downloadCompleted = YES;
+ }
+ //다운로드 된 이후에 segue가 작동한다.
+ return downloadCompleted;
+ }
  */
 
 
@@ -580,39 +533,38 @@ static NSString *CellIdentifier = @"MyBooksCell";
 #pragma mark - Download
 
 /*-(void)initializeFileDownloadDataArray
-{
-    //self.arrFileDownloadData = [[NSMutableArray alloc] init];
-    NSLog(@"self.arrFileDownloadData count:%d", [self.arrFileDownloadData count]);
-
-    if (downloadType == SAMPLE)
-        fileName = [NSString stringWithFormat:@"%@_preview.zip",aBook.bookId];
-    else if (downloadType == FULL)
-        fileName = [NSString stringWithFormat:@"%@_full.zip",aBook.bookId];
-    
-    //NSLog(@"##downloadType : %d", downloadType);
-    NSLog(@"##fileName : %@", fileName);
-    
-    [self.arrFileDownloadData addObject:[[FileDownloadInfo alloc] initWithFileTitle:aBook.bookId andDownloadSource:[fileHome stringByAppendingString:fileName]]];
-}
-*/
+ {
+ //app.arrFileDownloadData = [[NSMutableArray alloc] init];
+ NSLog(@"app.arrFileDownloadData count:%d", [app.arrFileDownloadData count]);
+ if (downloadType == SAMPLE)
+ fileName = [NSString stringWithFormat:@"%@_preview.zip",aBook.bookId];
+ else if (downloadType == FULL)
+ fileName = [NSString stringWithFormat:@"%@_full.zip",aBook.bookId];
+ 
+ //NSLog(@"##downloadType : %d", downloadType);
+ NSLog(@"##fileName : %@", fileName);
+ 
+ [app.arrFileDownloadData addObject:[[FileDownloadInfo alloc] initWithFileTitle:aBook.bookId andDownloadSource:[fileHome stringByAppendingString:fileName]]];
+ }
+ */
 
 -(int)getFileDownloadInfoIndexWithTaskIdentifier:(unsigned long)taskIdentifier
 {
     int index = 0;
     
-    /*NSArray *sortedArray = [self.arrFileDownloadData sortedArrayUsingDescriptors:
-                            @[[NSSortDescriptor sortDescriptorWithKey:nil
-                                                            ascending:NO
-                                                             selector:@selector(localizedCompare:)
-                               ]]];*/
+    /*NSArray *sortedArray = [app.arrFileDownloadData sortedArrayUsingDescriptors:
+     @[[NSSortDescriptor sortDescriptorWithKey:nil
+     ascending:NO
+     selector:@selector(localizedCompare:)
+     ]]];*/
     
     
-    NSArray* reversed = [[self.arrFileDownloadData reverseObjectEnumerator] allObjects];
+    NSArray* reversed = [[app.arrFileDownloadData reverseObjectEnumerator] allObjects];
     
-    for (int i=0; i<[self.arrFileDownloadData count]; i++)
+    for (int i=0; i<[app.arrFileDownloadData count]; i++)
     {
         FileDownloadInfo *fdi = [reversed objectAtIndex:i];
-  
+        
         if (fdi.taskIdentifier == taskIdentifier)
         {
             index = i;
@@ -632,68 +584,46 @@ static NSString *CellIdentifier = @"MyBooksCell";
     else if (downloadType == FULL)
         fileName = [NSString stringWithFormat:@"%@_full.zip",aBook.bookId];
     
-    if (downloadCompleted == NO)
+    //NSLog(@"##downloadType : %d", downloadType);
+    //NSLog(@"##[app.arrFileDownloadData count] : %d", [app.arrFileDownloadData count]);
+    
+    if (app.downloadCompleted == NO)
     {
-        [self alertWithTitle:@"Sorry." message:@"You can download only one book at a time."];
+       // [self alertWithTitle:@"Sorry." message:@"You can download only one book at a time."];
     }
     else
     {
-        [self savePersistence];
+        [app.arrFileDownloadData addObject:[[FileDownloadInfo alloc] initWithFileTitle:aBook.bookId andDownloadSource:[fileHome stringByAppendingString:fileName]]];
+        
+        
         [self saveSmallCoverImage];
+        [self savePersistence];
+
         [self getPersistence];
-        [self.tableView reloadData];
+ 
+        FileDownloadInfo *fdi = [app.arrFileDownloadData objectAtIndex:0];
         
-        NSURL *url = [NSURL URLWithString:[fileHome stringByAppendingString:fileName]];
-        NSURLRequest *request = [NSURLRequest requestWithURL:url];
+        // Check if should create a new download task using a URL, or using resume data.
+        if (fdi.taskIdentifier == -1)
+        {
+            //NSLog(@"taskIdentifier == -1");
+            fdi.downloadTask = [self.session downloadTaskWithURL:[NSURL URLWithString:fdi.downloadSource]];
+        }
+        else
+        {
+            fdi.downloadTask = [self.session downloadTaskWithResumeData:fdi.taskResumeData];
+        }
         
-        NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+        // Keep the new taskIdentifier.
+        fdi.taskIdentifier = fdi.downloadTask.taskIdentifier;
         
-        AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
+        // Start the download.
+        [fdi.downloadTask resume];
         
-        __block MyBooksCell *cell;
+        // Indicate for each file that is being downloaded.
+        fdi.isDownloading = YES;
         
-        NSURLSessionDownloadTask *downloadTask = [manager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
-            
-            downloadCompleted = NO;
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                
-                cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
-                
-                [cell.progressView setHidden:NO];
-                [cell.progressLabel setHidden:NO];
-                
-                [cell.progressView setProgress:downloadProgress.fractionCompleted];
-                
-                //cell.progressLabel.text = [NSString stringWithFormat:@"%.1f %%", downloadProgress.*100];
-                
-            }); } destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {
-                
-                NSURL *documentsDirectoryURL = [[NSFileManager defaultManager] URLForDirectory:NSCachesDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];
-                
-                return [documentsDirectoryURL URLByAppendingPathComponent:[response suggestedFilename]];
-                
-            } completionHandler:^(NSURLResponse *response, NSURL *filePath, NSError *error) {
-                NSLog(@"File downloaded to: %@", filePath);
-                
-                [cell.progressView setHidden:YES];
-                [cell.progressLabel setHidden:YES];
-                
-                [self unZipAndDeleteFiles];
-                
-                downloadCompleted = YES;
-            }];
-        
-        [downloadTask resume];
-        
-        [manager setDownloadTaskDidWriteDataBlock:^(NSURLSession *session, NSURLSessionDownloadTask *downloadTask, int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToWrite) {
-            
-            cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                cell.progressLabel.text = [NSString stringWithFormat:@"%.1f %%", ((CGFloat)totalBytesWritten / totalBytesExpectedToWrite)*100];
-            });
-        }];
+        app.downloadCompleted = NO;
     }
 }
 
@@ -715,9 +645,11 @@ static NSString *CellIdentifier = @"MyBooksCell";
 }
 
 
+
+
 #pragma mark - NSURLSession Delegate method implementation
 
-/*-(void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location
+-(void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location
 {
     NSError *error;
     NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -740,10 +672,11 @@ static NSString *CellIdentifier = @"MyBooksCell";
         // Change the flag values of the respective FileDownloadInfo object.
         //int index = [self getFileDownloadInfoIndexWithTaskIdentifier:downloadTask.taskIdentifier];
         
-        FileDownloadInfo *fdi = [self.arrFileDownloadData objectAtIndex:0];
+        FileDownloadInfo *fdi = [app.arrFileDownloadData objectAtIndex:0];
         
         fdi.isDownloading = NO;
         fdi.downloadComplete = YES;
+        app.downloadCompleted = YES;
         
         // Set the initial value to the taskIdentifier property of the fdi object,
         // so when the start button gets tapped again to start over the file download.
@@ -752,17 +685,12 @@ static NSString *CellIdentifier = @"MyBooksCell";
         // In case there is any resume data stored in the fdi object, just make it nil.
         fdi.taskResumeData = nil;
         
-       // [self unZipping : fdi.fileTitle];
-       // [self deleteFile : fdi.fileTitle];
-        
-        self.arrFileDownloadData = [[NSMutableArray alloc] init];
-        NSLog(@"222 self.arrFileDownloadData Count : %d", (int)[self.arrFileDownloadData count]);
-        
+
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
- 
+            
             // Reload the respective table view row using the main thread.
-              [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]]
-                                   withRowAnimation:UITableViewRowAnimationNone];
+            [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]]
+                                  withRowAnimation:UITableViewRowAnimationNone];
             
         }];
     }
@@ -775,23 +703,30 @@ static NSString *CellIdentifier = @"MyBooksCell";
 
 -(void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error
 {
-   
-    if (error != nil)
+    
+ /*   if (error != nil)
     {
         NSLog(@"Download completed with error: %@", [error localizedDescription]);
     }
     else
     {
         NSLog(@"Download finished successfully.");
-       
+        downloadCompleted = YES;
+        
         //다운로딩이 더 이상 없다면 배열을 초기화한다.
-        self.arrFileDownloadData = [[NSMutableArray alloc] init];
-        NSLog(@"self.arrFileDownloadData Count : %d", (int)[self.arrFileDownloadData count]);
+        app.arrFileDownloadData = [[NSMutableArray alloc] init];
     }
+ */
+    NSLog(@"Download finished successfully.");
+    app.downloadCompleted = YES;
     
+    //다운로딩이 더 이상 없다면 배열을 초기화한다.
+    app.arrFileDownloadData = [[NSMutableArray alloc] init];
     [self unZipAndDeleteFiles];
+    
+    NSLog(@"##### app.downloadCompleted : %d", app.downloadCompleted);
 }
-*/
+
 -(void)unZipAndDeleteFiles
 {
     NSLog(@"unZipAndDeleteFiles");
@@ -851,43 +786,83 @@ static NSString *CellIdentifier = @"MyBooksCell";
 
 
 /*
-
-- (void)unZipping : (NSString *)fileTitle
+ - (void)unZipping : (NSString *)fileTitle
+ {
+ 
+ NSString *filePath;
+ 
+ if (downloadType == SAMPLE)
+ filePath = [NSString stringWithFormat:@"%@/%@_preview.zip",[Utils homeDir],fileTitle];
+ else if (downloadType == FULL)
+ filePath = [NSString stringWithFormat:@"%@/%@_full.zip",[Utils homeDir],fileTitle];
+ NSLog(@"unZip : filePath : %@", filePath);
+ 
+ [SSZipArchive unzipFileAtPath:filePath toDestination:[Utils homeDir]];
+ }
+ - (void)deleteFile : (NSString *)fileTitle
+ {
+ NSString *filePath;
+ 
+ if (downloadType == SAMPLE)
+ filePath = [NSString stringWithFormat:@"%@/%@_preview.zip",[Utils homeDir],fileTitle];
+ else if (downloadType == FULL)
+ filePath = [NSString stringWithFormat:@"%@/%@_full.zip",[Utils homeDir],fileTitle];
+ NSFileManager *fileManager = [NSFileManager defaultManager];
+ [fileManager removeItemAtPath:filePath error:NULL];
+ 
+ if (downloadType == FULL)
+ {
+ NSString *prevFile = [NSString stringWithFormat:@"%@/%@_preview",[Utils homeDir],fileTitle];
+ fileManager = [NSFileManager defaultManager];
+ [fileManager removeItemAtPath:prevFile error:NULL];
+ }
+ }
+ */
+-(void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
 {
     
-    NSString *filePath;
-    
-    if (downloadType == SAMPLE)
-        filePath = [NSString stringWithFormat:@"%@/%@_preview.zip",[Utils homeDir],fileTitle];
-    else if (downloadType == FULL)
-        filePath = [NSString stringWithFormat:@"%@/%@_full.zip",[Utils homeDir],fileTitle];
-
-    NSLog(@"unZip : filePath : %@", filePath);
-    
-    [SSZipArchive unzipFileAtPath:filePath toDestination:[Utils homeDir]];
-}
-
-- (void)deleteFile : (NSString *)fileTitle
-{
-    NSString *filePath;
-    
-    if (downloadType == SAMPLE)
-        filePath = [NSString stringWithFormat:@"%@/%@_preview.zip",[Utils homeDir],fileTitle];
-    else if (downloadType == FULL)
-        filePath = [NSString stringWithFormat:@"%@/%@_full.zip",[Utils homeDir],fileTitle];
-
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    [fileManager removeItemAtPath:filePath error:NULL];
-    
-    if (downloadType == FULL)
+    if (totalBytesExpectedToWrite == NSURLSessionTransferSizeUnknown)
     {
-        NSString *prevFile = [NSString stringWithFormat:@"%@/%@_preview",[Utils homeDir],fileTitle];
-        fileManager = [NSFileManager defaultManager];
-        [fileManager removeItemAtPath:prevFile error:NULL];
+        NSLog(@"Unknown transfer size");
+    }
+    else
+    {
+        // Locate the FileDownloadInfo object among all based on the taskIdentifier property of the task.
+        int index = [self getFileDownloadInfoIndexWithTaskIdentifier:downloadTask.taskIdentifier];
+        
+        //NSLog(@"index = %d", index);
+        //NSLog(@"downloadTask.taskIdentifier : %d", downloadTask.taskIdentifier);
+        
+        FileDownloadInfo *fdi = [app.arrFileDownloadData objectAtIndex:index];
+        
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            // Calculate the progress.
+            fdi.downloadProgress = (double)totalBytesWritten / (double)totalBytesExpectedToWrite;
+            
+            // Get the progress view of the appropriate cell and update its progress.
+            //NSLog(@"index : %d", index);
+            
+            MyBooksCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0]];
+            
+            [cell.progressView setHidden:NO];
+            [cell.progressLabel setHidden:NO];
+            
+            //UIProgressView *progressView = (UIProgressView *)[cell viewWithTag:CellProgressBarTagValue];
+            
+            /*   if ([[NSString stringWithFormat:@"%.1f",fdi.downloadProgress] isEqualToString:@"1.0"])
+             {
+             NSLog(@"fdi.downloadProgress : %.1f", fdi.downloadProgress);
+             fdi.isDownloading = NO;
+             fdi.downloadComplete = YES;
+             fdi.taskIdentifier = -1;
+             fdi.taskResumeData = nil;
+             }*/
+            
+            cell.progressView.progress = fdi.downloadProgress;
+            cell.progressLabel.text = [NSString stringWithFormat:@"%.1f %%", fdi.downloadProgress*100];
+        }];
     }
 }
-*/
-
 
 -(void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session
 {
@@ -925,6 +900,8 @@ static NSString *CellIdentifier = @"MyBooksCell";
 -(void)viewWillAppear:(BOOL)animated
 {
     [self.tableView reloadData];
+    
+    NSLog(@"# app.downloadCompleted : %d", app.downloadCompleted);
 }
 
 

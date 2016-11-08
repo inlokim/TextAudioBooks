@@ -66,6 +66,7 @@
 		7A6689791DCC6457005CB20A /* UIRefreshControl+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A66896F1DCC6457005CB20A /* UIRefreshControl+AFNetworking.m */; };
 		7A66897A1DCC6457005CB20A /* UIWebView+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A6689711DCC6457005CB20A /* UIWebView+AFNetworking.m */; };
 		7A66897E1DCC6BAF005CB20A /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A41D3B41DACAE26000D3AB1 /* StoreKit.framework */; };
+		7A6689831DD01A10005CB20A /* BackgroundSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A6689821DD01A10005CB20A /* BackgroundSessionManager.m */; };
 		7AA049CD1DA37C0F006A8CB4 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AA049CC1DA37C0F006A8CB4 /* Utils.m */; };
 		7AA049CF1DA4BF38006A8CB4 /* play-off~iphone@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7AA049CE1DA4BF38006A8CB4 /* play-off~iphone@3x.png */; };
 /* End PBXBuildFile section */
@@ -208,6 +209,7 @@
 		7A6689701DCC6457005CB20A /* UIWebView+AFNetworking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+AFNetworking.h"; sourceTree = "<group>"; };
 		7A6689711DCC6457005CB20A /* UIWebView+AFNetworking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+AFNetworking.m"; sourceTree = "<group>"; };
 		7A6689811DD01993005CB20A /* BackgroundSessionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BackgroundSessionManager.h; sourceTree = "<group>"; };
+		7A6689821DD01A10005CB20A /* BackgroundSessionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BackgroundSessionManager.m; sourceTree = "<group>"; };
 		7AA049CB1DA37C0F006A8CB4 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		7AA049CC1DA37C0F006A8CB4 /* Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
 		7AA049CE1DA4BF38006A8CB4 /* play-off~iphone@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "play-off~iphone@3x.png"; path = "images/play-off~iphone@3x.png"; sourceTree = "<group>"; };
@@ -477,6 +479,7 @@
 				3121514C1DA9241900A69D9A /* ParseOperation.h */,
 				3121514D1DA9241900A69D9A /* ParseOperation.m */,
 				7A6689811DD01993005CB20A /* BackgroundSessionManager.h */,
+				7A6689821DD01A10005CB20A /* BackgroundSessionManager.m */,
 			);
 			name = Lib;
 			sourceTree = "<group>";
@@ -652,6 +655,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A6689831DD01A10005CB20A /* BackgroundSessionManager.m in Sources */,
 				7A66895C1DCC63DB005CB20A /* AFURLSessionManager.m in Sources */,
 				7A6689771DCC6457005CB20A /* UIImageView+AFNetworking.m in Sources */,
 				31629C111DC77CDA0026B25E /* BookCoverViewController.m in Sources */,

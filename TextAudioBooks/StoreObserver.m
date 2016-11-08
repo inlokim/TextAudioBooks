@@ -110,23 +110,16 @@ NSString * const IAPPurchaseNotification = @"IAPPurchaseNotification";
                 [self.productsPurchased addObject:transaction];
                 
                 NSLog(@"Deliver content for %@",transaction.payment.productIdentifier);
-                
-                                
-                
+               
                 // Check whether the purchased product has content hosted with Apple.
                 if(transaction.downloads && transaction.downloads.count > 0)
                 {
- 
                     NSLog(@"IAPDownloadStarted");
-                    
-                    
                     [self completeTransaction:transaction forStatus:IAPDownloadStarted];
                 }
                 else
                 {
                     NSLog(@"IAPPurchaseSucceeded");
-                    
-                    
                     [self completeTransaction:transaction forStatus:IAPPurchaseSucceeded];
                 }
             }

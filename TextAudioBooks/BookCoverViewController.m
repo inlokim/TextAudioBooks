@@ -49,7 +49,9 @@
         [contentsButton setEnabled:NO];
     }
     
+    self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:239.0/255.0 green:238.0/255.0 blue:244.0/255.0 alpha:1.0];
     
+    self.navigationController.navigationBar.translucent = NO;
 }
 
 #pragma mark - Segues
